@@ -1,8 +1,6 @@
-//asd
-//dsa
 #include <stdio.h>
 
 int main() {
-
-	printf("Helloka !!!!!!!!");
+	
+	printf("Hello World!");
 }

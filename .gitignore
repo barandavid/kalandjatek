@@ -31,3 +31,7 @@
 # Debug files
 *.dSYM/
 *.su
+
+#.vc.opend es .vc.db bug javitasa
+*.VC.opendb
+*.VC.db
