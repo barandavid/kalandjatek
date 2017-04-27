@@ -1,16 +1,10 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define MAX 1000
 
-void szetszed(char s[], lista *akt);
 
-int getline(char s[], int n) {
-	int c, i;
-	for (i = 0; i<n && (c = getchar()) != EOF&&c != '\n'; i++) s[i] = c;
-	s[i] = '\0';
-	while (c != EOF&&c != '\n') c = getchar();
-	return i;
-}
 
 
 typedef struct list {
@@ -23,13 +17,23 @@ typedef struct list {
 	char szuks_targy_op2[MAX];
 	char plusz_minusz_targy_op1[MAX];
 	char plusz_minusz_targy_op2[MAX];
-	char hova_op1[MAX];
-	char hova_op2[MAX];
+	int hova_op1;
+	int hova_op2;
 	char mi_tort_op1[MAX];
 	char mi_tort_op2[MAX];
-	struct list *kov;
+	struct lista *kov;
 }lista;
 
+
+void szetszed(char s[], struct list *akt);
+
+int getline(char s[], int n) {
+	int c, i;
+	for (i = 0; i<n && (c = getchar()) != EOF&&c != '\n'; i++) s[i] = c;
+	s[i] = '\0';
+	while (c != EOF&&c != '\n') c = getchar();
+	return i;
+}
 
 void main() {
 	FILE *fp;
@@ -56,30 +60,72 @@ void main() {
 		akt->kov = NULL;
 		szetszed(st, akt);
 		temp = akt;
-
-
-		printf("%s", st);
 	}
 	
+	akt = elso;
+	while (akt != NULL) {
+		printf("sorszam: %d\n", akt->sorszam);
+		printf("helyszin: %s\n", akt->helyszin);
+		printf("leiras: %s\n", akt->leiras);
+		printf("op1 leiras: %s\n", akt->op1_leiras);
+		printf("op2 leiras: %s\n", akt->op2_leiras);
+		printf("szukseges targy 1: %s\n", akt->szuks_targy_op1);
+		printf("szukseges targy 2: %s\n", akt->szuks_targy_op2);
+		printf("plusz/minusz targy op1: %s\n", akt->plusz_minusz_targy_op1);
+		printf("plusz/minusz targy op2: %s\n", akt->plusz_minusz_targy_op2);
+		printf("hova op1: %d\n", akt->hova_op1);
+		printf("hova op2: %d\n", akt->hova_op2);
+		printf("mi tortenik op1: %s\n", akt->mi_tort_op1);
+		printf("mi tortenik op2: %s\n", akt->mi_tort_op2);
+		printf("----------------------------uj sor---------------------\n");
+		akt = akt->kov;
+	}
 
 
 }
 
-void szetszed(char s[], lista *akt) {
+void szetszed(char s[], struct list *akt) {
 	char string[MAX];
-	int i=0,j;
+	int i=0,j,k=0;
 	do {
 		j = 0;
 		for (; s[i] != '\0' && s[i] != '\n' && s[i] != ';'; i++) {
 			string[j] = s[i];
 			j++;
-			if (s[i] == ';' || s[i] == '\0' || s[i] == '\n'){
-				string[j] = '\0';
-			}
-
-
 		}
-
+		string[j] = '\0';/*
+		printf("%s\n", string);*/
+		
+		switch (k){
+		case 0: 
+			akt->sorszam = atoi(string);
+		case 1:
+			strcpy(akt->helyszin, string);
+		case 2:
+			strcpy(akt->leiras, string);
+		case 3:
+			strcpy(akt->op1_leiras, string);
+		case 4:
+			strcpy(akt->op2_leiras, string);
+		case 5:
+			strcpy(akt->szuks_targy_op1, string);
+		case 6:
+			strcpy(akt->szuks_targy_op2, string);
+		case 7:
+			strcpy(akt->plusz_minusz_targy_op1, string);
+		case 8:
+			strcpy(akt->plusz_minusz_targy_op2, string);
+		case 9:
+			akt->hova_op1 = atoi(string);
+		case 10:
+			akt->hova_op2 = atoi(string);
+		case 11:
+			strcpy(akt->mi_tort_op1, string);
+		case 12:
+			strcpy(akt->mi_tort_op2, string);
+		}
+		k++;
+		i++;
 	} while (s[i] != '\0' && s[i] != '\n');
+	/*printf("----------------------------uj sor---------------------\n");*/
 }
-
