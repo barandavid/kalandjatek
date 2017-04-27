@@ -1,13 +1,11 @@
-#include <stdio.h>
+﻿#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #define MAX 1000
 
 
-
-
-typedef struct list {
+typedef struct list {			//lista, ahova beolvasom majd a dolgokat
 	int sorszam;
 	char helyszin[MAX];
 	char leiras[MAX];
@@ -24,8 +22,30 @@ typedef struct list {
 	struct lista *kov;
 }lista;
 
+int ekezet(char c) {
+	//egy karakter ellenorzese, hogy ekezetes karakter-e
+	//kis es nagybetus ekezetek
+	char s[18] = { 'á', 'Á', 'é', 'É', 'í', 'Í', 'ó', 'Ó', 'ü', 'Ü', 'ű', 'Ű', 'ö', 'Ö', 'ő', 'Ő', 'ú', 'Ú' };
+	int i, van = 0;
+
+	for (i = 0; i < 18 && van == 0; i++) {
+		if (c == s[i]) van = 1;
+	}
+	if (van) return 1;
+	return 0;
+}
+int magyarbetu(char c) {
+	//egy karakter ellenorzese hogy a magyar ABC-ben benn van-e
+	//kis es nagybetuk egyarant, ekezetekkel
+	if ((c >= 'a'&&c <= 'z') || (c >= 'A' && c <= 'Z') || ekezet(c)) return 1;
+	return 0;
+}
+
+
+
 
 void szetszed(char s[], struct list *akt);
+int ellenoriz(char s[], struct list *akt);
 
 int getline(char s[], int n) {
 	int c, i;
@@ -36,8 +56,8 @@ int getline(char s[], int n) {
 }
 
 void main() {
-	FILE *fp;
-	char st[MAX];
+	FILE *fp;				//filepointer
+	char st[MAX];			//string, ahova lementem a dolgokat a csv-ből
 	lista *elso = NULL, *akt = NULL, *temp = NULL;
 
 	fp = fopen("beadandov3.0.csv", "r");
@@ -47,10 +67,19 @@ void main() {
 		return 0;
 	}
 
+	/*ellenőrzés ide kell majd */
 	while (!feof(fp)) {
 		fgets(st, MAX, fp);
+		if (ellenoriz(st, akt) == 0) {
+			printf("Rossz volt a csv formatuma \n");
+			return 0;
+		}
+	}
 
-		akt = calloc(1, sizeof(lista));
+	while (!feof(fp)) {
+		fgets(st, MAX, fp);			//beolvasom soronként 
+
+		akt = calloc(1, sizeof(lista));			//memóriafoglalás
 		if (akt == NULL) {
 			printf("Nem siekrult a memoriafoglalas!\n");
 			return 0;
@@ -84,19 +113,19 @@ void main() {
 
 }
 
-void szetszed(char s[], struct list *akt) {
+void szetszed(char s[], struct list *akt) {		//szétszedi a stringbe fájlból beolvasott dolgokat láncolt listába
 	char string[MAX];
 	int i=0,j,k=0;
 	do {
 		j = 0;
-		for (; s[i] != '\0' && s[i] != '\n' && s[i] != ';'; i++) {
+		for (; s[i] != '\0' && s[i] != '\n' && s[i] != ';'; i++) {	//ciklus, ami ;-ig vagy sorvégig megy 
 			string[j] = s[i];
 			j++;
 		}
-		string[j] = '\0';/*
+		string[j] = '\0';/*									//lezárja a stringet ha eléri a ;-t vagy sorvéget
 		printf("%s\n", string);*/
 		
-		switch (k){
+		switch (k){							//van egy változó és egyes esetekben ,,case,,-ekben mit kell csinálni
 		case 0: 
 			akt->sorszam = atoi(string);
 		case 1:
@@ -125,7 +154,97 @@ void szetszed(char s[], struct list *akt) {
 			strcpy(akt->mi_tort_op2, string);
 		}
 		k++;
-		i++;
+		i++;			//átléptetjük a ;-n, azért kell ide az i++
 	} while (s[i] != '\0' && s[i] != '\n');
 	/*printf("----------------------------uj sor---------------------\n");*/
+}
+
+int ellenoriz(char s[], struct list *akt) { //leellenőrzi, hogy az adott helyen megfelelő karakter/szám van-e
+	char string[MAX];
+	int i = 0, j, k = 0, c;
+	do {
+		j = 0;
+		for (; s[i] != '\0' && s[i] != '\n' && s[i] != ';'; i++) {	//ciklus, ami ;-ig vagy sorvégig megy 
+			string[j] = s[i];
+			j++;
+		}
+		string[j] = '\0';/*									//lezárja a stringet ha eléri a ;-t vagy sorvéget
+		printf("%s\n", string);*/
+
+		if (k = 0) {
+			for (c = 0; string[c] != '\0'; c++) {
+				if (string[c] <'0' || string[c]>'9') return 0;
+			}
+			printf("sorszam\n");
+		}
+		else if (k = 1) {
+			for (c = 0; string[c] != '\0'; c++) {
+				if ((string[c]< '0' || string[c]> '9') && string[c] != '.' && string[c] != ',' && string[c] != ' ' && !magyarbetu(string[c])) return 0;
+			}
+			printf("%c,helyszin\n", string[c]);
+		}
+		else if (k = 2) {
+			for (c = 0; string[c] != '\0'; c++) {
+				if ((string[c]< '0' || string[c]> '9') && string[c] != '.' && string[c] != ',' && string[c] != ' ' && !magyarbetu(string[c])) return 0;
+			}
+			printf("leiras\n");
+		}
+		else if (k = 3) {
+			for (c = 0; string[c] != '\0'; c++) {
+				if ((string[c]< '0' || string[c]> '9') && string[c] != '.' && string[c] != ',' && string[c] != ' ' && !magyarbetu(string[c])) return 0;
+			}
+			printf("op1 leiras\n");
+		}
+		else if (k = 4) {
+			for (c = 0; string[c] != '\0'; c++) {
+				if ((string[c]< '0' || string[c]> '9') && string[c] != '.' && string[c] != ',' && string[c] != ' ' && !magyarbetu(string[c])) return 0;
+			}
+			printf("op2 leiras\n");
+		}
+		else if (k = 5) {
+			for (c = 0; string[c] != '\0'; c++) {
+				if ((string[c]< '0' || string[c]> '9') && string[c] != '.' && string[c] != ',' && string[c] != ' ' && !magyarbetu(string[c])) return 0;
+			}
+		}
+		else if (k = 6) {
+			for (c = 0; string[c] != '\0'; c++) {
+				if ((string[c]< '0' || string[c]> '9') && string[c] != '.' && string[c] != ',' && string[c] != ' ' && !magyarbetu(string[c])) return 0;
+			}
+		}
+		else if (k = 7) {
+			for (c = 0; string[c] != '\0'; c++) {
+				if ((string[c]< '0' || string[c]> '9') && string[c] != '.' && string[c] != ',' && string[c] != ' ' && !magyarbetu(string[c])) return 0;
+			}
+		}
+		else if (k = 8) {
+			for (c = 0; string[c] != '\0'; c++) {
+				if ((string[c]< '0' || string[c]> '9') && string[c] != '.' && string[c] != ',' && string[c] != ' ' && !magyarbetu(string[c])) return 0;
+			}
+		}
+		else if (k = 9) {
+			for (c = 0; string[c] != '\0'; c++) {
+				if (string[c] <'0' || string[c]>'9') return 0;
+			}
+		}
+		else if (k = 10) {
+			for (c = 0; string[c] != '\0'; c++) {
+				if (string[c] <'0' || string[c]>'9') return 0;
+			}
+		}
+		else if (k = 11) {
+			for (c = 0; string[c] != '\0'; c++) {
+				if ((string[c]< '0' || string[c]> '9') && string[c] != '.' && string[c] != ',' && string[c] != ' ' && !magyarbetu(string[c])) return 0;
+			}
+		}
+		else if (k = 12) {
+			for (c = 0; string[c] != '\0'; c++) {
+				if ((string[c]< '0' || string[c]> '9') && string[c] != '.' && string[c] != ',' && string[c] != ' ' && !magyarbetu(string[c])) return 0;
+			}
+		}
+	
+		k++;
+		i++;
+	} while (s[i] != '\0' && s[i] != '\n');
+
+	return 1;
 }
