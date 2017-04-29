@@ -45,7 +45,7 @@ int magyarbetu(char c) {
 
 
 void szetszed(char s[], struct list *akt);
-int ellenoriz(char s[], struct list *akt);
+int ellenoriz(char s[]);
 
 int getline(char s[], int n) {
 	int c, i;
@@ -70,7 +70,7 @@ void main() {
 	/*ellenőrzés ide kell majd */
 	while (!feof(fp)) {
 		fgets(st, MAX, fp);
-		if (ellenoriz(st, akt) == 0) {
+		if (ellenoriz(st) == 0) {
 			printf("Rossz volt a csv formatuma \n");
 			return 0;
 		}
@@ -159,87 +159,98 @@ void szetszed(char s[], struct list *akt) {		//szétszedi a stringbe fájlból b
 	/*printf("----------------------------uj sor---------------------\n");*/
 }
 
-int ellenoriz(char s[], struct list *akt) { //leellenőrzi, hogy az adott helyen megfelelő karakter/szám van-e
+int ellenoriz(char s[]) { //leellenőrzi, hogy az adott helyen megfelelő karakter/szám van-e
 	char string[MAX];
 	int i = 0, j, k = 0, c;
+
+	printf("%s\n", s);
+
 	do {
 		j = 0;
 		for (; s[i] != '\0' && s[i] != '\n' && s[i] != ';'; i++) {	//ciklus, ami ;-ig vagy sorvégig megy 
 			string[j] = s[i];
 			j++;
 		}
-		string[j] = '\0';/*									//lezárja a stringet ha eléri a ;-t vagy sorvéget
-		printf("%s\n", string);*/
+		string[j] = '\0';								//lezárja a stringet ha eléri a ;-t vagy sorvéget
+		printf("%s\n", string);
 
-		if (k = 0) {
+		if (k == 0) {
 			for (c = 0; string[c] != '\0'; c++) {
 				if (string[c] <'0' || string[c]>'9') return 0;
 			}
 			printf("sorszam\n");
 		}
-		else if (k = 1) {
+		else if (k == 1) {
 			for (c = 0; string[c] != '\0'; c++) {
 				if ((string[c]< '0' || string[c]> '9') && string[c] != '.' && string[c] != ',' && string[c] != ' ' && !magyarbetu(string[c])) return 0;
 			}
 			printf("%c,helyszin\n", string[c]);
 		}
-		else if (k = 2) {
+		else if (k == 2) {
 			for (c = 0; string[c] != '\0'; c++) {
 				if ((string[c]< '0' || string[c]> '9') && string[c] != '.' && string[c] != ',' && string[c] != ' ' && !magyarbetu(string[c])) return 0;
 			}
 			printf("leiras\n");
 		}
-		else if (k = 3) {
+		else if (k == 3) {
 			for (c = 0; string[c] != '\0'; c++) {
 				if ((string[c]< '0' || string[c]> '9') && string[c] != '.' && string[c] != ',' && string[c] != ' ' && !magyarbetu(string[c])) return 0;
 			}
 			printf("op1 leiras\n");
 		}
-		else if (k = 4) {
+		else if (k == 4) {
 			for (c = 0; string[c] != '\0'; c++) {
 				if ((string[c]< '0' || string[c]> '9') && string[c] != '.' && string[c] != ',' && string[c] != ' ' && !magyarbetu(string[c])) return 0;
 			}
 			printf("op2 leiras\n");
 		}
-		else if (k = 5) {
+		else if (k == 5) {
 			for (c = 0; string[c] != '\0'; c++) {
 				if ((string[c]< '0' || string[c]> '9') && string[c] != '.' && string[c] != ',' && string[c] != ' ' && !magyarbetu(string[c])) return 0;
 			}
+			printf("szukseges targy 1 \n");
 		}
-		else if (k = 6) {
+		else if (k == 6) {
 			for (c = 0; string[c] != '\0'; c++) {
 				if ((string[c]< '0' || string[c]> '9') && string[c] != '.' && string[c] != ',' && string[c] != ' ' && !magyarbetu(string[c])) return 0;
 			}
+			printf("szukseges targy 2 \n");
 		}
-		else if (k = 7) {
+		else if (k == 7) {
 			for (c = 0; string[c] != '\0'; c++) {
 				if ((string[c]< '0' || string[c]> '9') && string[c] != '.' && string[c] != ',' && string[c] != ' ' && !magyarbetu(string[c])) return 0;
 			}
+			printf("plusz minusz targy op1 \n");
 		}
-		else if (k = 8) {
+		else if (k == 8) {
 			for (c = 0; string[c] != '\0'; c++) {
 				if ((string[c]< '0' || string[c]> '9') && string[c] != '.' && string[c] != ',' && string[c] != ' ' && !magyarbetu(string[c])) return 0;
 			}
+			printf("plusz minusz targy op2 \n");
 		}
-		else if (k = 9) {
+		else if (k == 9) {
 			for (c = 0; string[c] != '\0'; c++) {
 				if (string[c] <'0' || string[c]>'9') return 0;
 			}
+			printf("hova op1 \n");
 		}
-		else if (k = 10) {
+		else if (k == 10) {
 			for (c = 0; string[c] != '\0'; c++) {
 				if (string[c] <'0' || string[c]>'9') return 0;
 			}
+			printf("hova op2 \n");
 		}
-		else if (k = 11) {
+		else if (k == 11) {
 			for (c = 0; string[c] != '\0'; c++) {
 				if ((string[c]< '0' || string[c]> '9') && string[c] != '.' && string[c] != ',' && string[c] != ' ' && !magyarbetu(string[c])) return 0;
 			}
+			printf("mi tort op1 \n");
 		}
-		else if (k = 12) {
+		else if (k == 12) {
 			for (c = 0; string[c] != '\0'; c++) {
 				if ((string[c]< '0' || string[c]> '9') && string[c] != '.' && string[c] != ',' && string[c] != ' ' && !magyarbetu(string[c])) return 0;
 			}
+			printf("mi tort op2 \n");
 		}
 	
 		k++;
