@@ -1,0 +1,7 @@
+﻿  Source.c
+c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(71): warning C4098: 'main': 'void' function returning a value
+c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(79): warning C4098: 'main': 'void' function returning a value
+c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(89): warning C4098: 'main': 'void' function returning a value
+c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(92): warning C4133: '=': incompatible types - from 'lista *' to 'lista *'
+c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(114): warning C4133: '=': incompatible types - from 'lista *' to 'lista *'
+  kalandjatek.vcxproj -> C:\Users\Péter\Source\Repos\kalandjatek\kalandjatek\x64\Debug\kalandjatek.exe

@@ -1,6 +1,7 @@
 ﻿#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <Windows.h>
 
 #define MAX 1000
 
@@ -60,7 +61,10 @@ void main() {
 	char st[MAX];			//string, ahova lementem a dolgokat a csv-ből
 	lista *elso = NULL, *akt = NULL, *temp = NULL;
 
-	fp = fopen("beadandov3.0.csv", "r");
+	system("chcp 1250");
+	system("cls");
+
+	fp = fopen("jatek.csv", "r");
 
 	if (fp == NULL) {
 		printf("Hiba a fajl megnyitasakor! \n");
@@ -71,7 +75,7 @@ void main() {
 	while (!feof(fp)) {
 		fgets(st, MAX, fp);
 		if (ellenoriz(st) == 0) {
-			printf("Rossz volt a csv formatuma \n");
+			printf("Rossz volt a csv formátuma \n");
 			return 0;
 		}
 	}
@@ -174,85 +178,23 @@ int ellenoriz(char s[]) { //leellenőrzi, hogy az adott helyen megfelelő karakt
 		string[j] = '\0';								//lezárja a stringet ha eléri a ;-t vagy sorvéget
 		printf("%s\n", string);
 
-		if (k == 0) {
+		if (k == 0 || k==9 || k==10) {  //sorszám mező, tovább ugrások mezők helyességének ellenőrzése
 			for (c = 0; string[c] != '\0'; c++) {
 				if (string[c] <'0' || string[c]>'9') return 0;
 			}
-			printf("sorszam\n");
 		}
-		else if (k == 1) {
+		
+		else if (k == 5 || k==6) { //szükséges tárgyak nevének ellenőrzése
 			for (c = 0; string[c] != '\0'; c++) {
-				if ((string[c]< '0' || string[c]> '9') && string[c] != '.' && string[c] != ',' && string[c] != ' ' && !magyarbetu(string[c])) return 0;
+				if ((string[c]< '0' || string[c]> '9') && string[c] != ' ' && !magyarbetu(string[c])) return 0;
 			}
-			printf("%c,helyszin\n", string[c]);
 		}
-		else if (k == 2) {
+		else if (k == 7 || k==8) { // +/- tárgyak mezők ellenőrzése
 			for (c = 0; string[c] != '\0'; c++) {
-				if ((string[c]< '0' || string[c]> '9') && string[c] != '.' && string[c] != ',' && string[c] != ' ' && !magyarbetu(string[c])) return 0;
+				if ((string[c]< '0' || string[c]> '9') && string[c] != '-' && string[c] != '+' && string[c] != ' ' && !magyarbetu(string[c])) return 0;
 			}
-			printf("leiras\n");
 		}
-		else if (k == 3) {
-			for (c = 0; string[c] != '\0'; c++) {
-				if ((string[c]< '0' || string[c]> '9') && string[c] != '.' && string[c] != ',' && string[c] != ' ' && !magyarbetu(string[c])) return 0;
-			}
-			printf("op1 leiras\n");
-		}
-		else if (k == 4) {
-			for (c = 0; string[c] != '\0'; c++) {
-				if ((string[c]< '0' || string[c]> '9') && string[c] != '.' && string[c] != ',' && string[c] != ' ' && !magyarbetu(string[c])) return 0;
-			}
-			printf("op2 leiras\n");
-		}
-		else if (k == 5) {
-			for (c = 0; string[c] != '\0'; c++) {
-				if ((string[c]< '0' || string[c]> '9') && string[c] != '.' && string[c] != ',' && string[c] != ' ' && !magyarbetu(string[c])) return 0;
-			}
-			printf("szukseges targy 1 \n");
-		}
-		else if (k == 6) {
-			for (c = 0; string[c] != '\0'; c++) {
-				if ((string[c]< '0' || string[c]> '9') && string[c] != '.' && string[c] != ',' && string[c] != ' ' && !magyarbetu(string[c])) return 0;
-			}
-			printf("szukseges targy 2 \n");
-		}
-		else if (k == 7) {
-			for (c = 0; string[c] != '\0'; c++) {
-				if ((string[c]< '0' || string[c]> '9') && string[c] != '.' && string[c] != ',' && string[c] != ' ' && !magyarbetu(string[c])) return 0;
-			}
-			printf("plusz minusz targy op1 \n");
-		}
-		else if (k == 8) {
-			for (c = 0; string[c] != '\0'; c++) {
-				if ((string[c]< '0' || string[c]> '9') && string[c] != '.' && string[c] != ',' && string[c] != ' ' && !magyarbetu(string[c])) return 0;
-			}
-			printf("plusz minusz targy op2 \n");
-		}
-		else if (k == 9) {
-			for (c = 0; string[c] != '\0'; c++) {
-				if (string[c] <'0' || string[c]>'9') return 0;
-			}
-			printf("hova op1 \n");
-		}
-		else if (k == 10) {
-			for (c = 0; string[c] != '\0'; c++) {
-				if (string[c] <'0' || string[c]>'9') return 0;
-			}
-			printf("hova op2 \n");
-		}
-		else if (k == 11) {
-			for (c = 0; string[c] != '\0'; c++) {
-				if ((string[c]< '0' || string[c]> '9') && string[c] != '.' && string[c] != ',' && string[c] != ' ' && !magyarbetu(string[c])) return 0;
-			}
-			printf("mi tort op1 \n");
-		}
-		else if (k == 12) {
-			for (c = 0; string[c] != '\0'; c++) {
-				if ((string[c]< '0' || string[c]> '9') && string[c] != '.' && string[c] != ',' && string[c] != ' ' && !magyarbetu(string[c])) return 0;
-			}
-			printf("mi tort op2 \n");
-		}
-	
+		// A többi fajta mezőt nem szükséges ellenőrizni
 		k++;
 		i++;
 	} while (s[i] != '\0' && s[i] != '\n');
