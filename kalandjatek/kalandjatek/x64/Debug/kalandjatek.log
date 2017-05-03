@@ -1,7 +1,13 @@
 ﻿  Source.c
-c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(71): warning C4098: 'main': 'void' function returning a value
-c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(79): warning C4098: 'main': 'void' function returning a value
-c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(89): warning C4098: 'main': 'void' function returning a value
-c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(92): warning C4133: '=': incompatible types - from 'lista *' to 'lista *'
-c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(114): warning C4133: '=': incompatible types - from 'lista *' to 'lista *'
-  kalandjatek.vcxproj -> C:\Users\Péter\Source\Repos\kalandjatek\kalandjatek\x64\Debug\kalandjatek.exe
+c:\users\dávid\desktop\prog2-beadandó\program\kalandjatek\kalandjatek\kalandjatek\source.c(80): warning C4098: 'main': 'void' function returning a value
+c:\users\dávid\desktop\prog2-beadandó\program\kalandjatek\kalandjatek\kalandjatek\source.c(88): warning C4098: 'main': 'void' function returning a value
+c:\users\dávid\desktop\prog2-beadandó\program\kalandjatek\kalandjatek\kalandjatek\source.c(100): warning C4098: 'main': 'void' function returning a value
+c:\users\dávid\desktop\prog2-beadandó\program\kalandjatek\kalandjatek\kalandjatek\source.c(103): warning C4133: '=': incompatible types - from 'lista *' to 'lista *'
+c:\users\dávid\desktop\prog2-beadandó\program\kalandjatek\kalandjatek\kalandjatek\source.c(123): warning C4133: '=': incompatible types - from 'lista *' to 'lista *'
+c:\users\dávid\desktop\prog2-beadandó\program\kalandjatek\kalandjatek\kalandjatek\source.c(217): warning C4133: '=': incompatible types - from 'lista *' to 'lista *'
+c:\users\dávid\desktop\prog2-beadandó\program\kalandjatek\kalandjatek\kalandjatek\source.c(229): warning C4013: '_getche' undefined; assuming extern returning int
+c:\users\dávid\desktop\prog2-beadandó\program\kalandjatek\kalandjatek\kalandjatek\source.c(240): warning C4133: '=': incompatible types - from 'targyak *' to 'targyak *'
+c:\users\dávid\desktop\prog2-beadandó\program\kalandjatek\kalandjatek\kalandjatek\source.c(259): warning C4133: '=': incompatible types - from 'lista *' to 'lista *'
+c:\users\dávid\desktop\prog2-beadandó\program\kalandjatek\kalandjatek\kalandjatek\source.c(244): warning C4716: 'targyell': must return a value
+c:\users\dávid\desktop\prog2-beadandó\program\kalandjatek\kalandjatek\kalandjatek\source.c(249): warning C4716: 'targyhozzaad': must return a value
+  kalandjatek.vcxproj -> C:\Users\Dávid\Desktop\prog2-beadandó\program\kalandjatek\kalandjatek\x64\Debug\kalandjatek.exe

@@ -4,6 +4,7 @@
 #include <Windows.h>
 
 #define MAX 1000
+#define DEBUG 0				//arra való, hogyha ez 1-esre állítjuk tudunk vele kiíratni kívánt elemeket
 
 
 typedef struct list {			//lista, ahova beolvasom majd a dolgokat
@@ -12,16 +13,20 @@ typedef struct list {			//lista, ahova beolvasom majd a dolgokat
 	char leiras[MAX];
 	char op1_leiras[MAX];
 	char op2_leiras[MAX];
-	char szuks_targy_op1[MAX];
-	char szuks_targy_op2[MAX];
-	char plusz_minusz_targy_op1[MAX];
-	char plusz_minusz_targy_op2[MAX];
+	char szuks_targy[MAX];
+	char plusz_minusz_targy[MAX];
 	int hova_op1;
 	int hova_op2;
 	char mi_tort_op1[MAX];
 	char mi_tort_op2[MAX];
 	struct lista *kov;
 }lista;
+
+typedef struct targy {				//tárgyak listája
+	char nev[20];
+	int drb;
+	struct targyak *kov;
+}targyak;
 
 int ekezet(char c) {
 	//egy karakter ellenorzese, hogy ekezetes karakter-e
@@ -47,6 +52,9 @@ int magyarbetu(char c) {
 
 void szetszed(char s[], struct list *akt);
 int ellenoriz(char s[]);
+void kiir(lista * elso, int szam);
+int opvalasztas();
+void jatek(lista *elso);
 
 int getline(char s[], int n) {
 	int c, i;
@@ -61,8 +69,9 @@ void main() {
 	char st[MAX];			//string, ahova lementem a dolgokat a csv-ből
 	lista *elso = NULL, *akt = NULL, *temp = NULL;
 
-	system("chcp 1250");
-	system("cls");
+
+	system("chcp 1250");			//ékezetes betűket is ki tudjunk írni
+	system("cls");					//letörli a felületet
 
 	fp = fopen("jatek.csv", "r");
 
@@ -80,6 +89,8 @@ void main() {
 		}
 	}
 
+	rewind(fp);						//fájlmutatót az elejére állítja
+
 	while (!feof(fp)) {
 		fgets(st, MAX, fp);			//beolvasom soronként 
 
@@ -94,26 +105,26 @@ void main() {
 		szetszed(st, akt);
 		temp = akt;
 	}
-	
-	akt = elso;
-	while (akt != NULL) {
-		printf("sorszam: %d\n", akt->sorszam);
-		printf("helyszin: %s\n", akt->helyszin);
-		printf("leiras: %s\n", akt->leiras);
-		printf("op1 leiras: %s\n", akt->op1_leiras);
-		printf("op2 leiras: %s\n", akt->op2_leiras);
-		printf("szukseges targy 1: %s\n", akt->szuks_targy_op1);
-		printf("szukseges targy 2: %s\n", akt->szuks_targy_op2);
-		printf("plusz/minusz targy op1: %s\n", akt->plusz_minusz_targy_op1);
-		printf("plusz/minusz targy op2: %s\n", akt->plusz_minusz_targy_op2);
-		printf("hova op1: %d\n", akt->hova_op1);
-		printf("hova op2: %d\n", akt->hova_op2);
-		printf("mi tortenik op1: %s\n", akt->mi_tort_op1);
-		printf("mi tortenik op2: %s\n", akt->mi_tort_op2);
-		printf("----------------------------uj sor---------------------\n");
-		akt = akt->kov;
+	if (DEBUG) {
+		akt = elso;							//lista bejárás
+		while (akt != NULL) {
+			printf("sorszam: %d\n", akt->sorszam);
+			printf("helyszin: %s\n", akt->helyszin);
+			printf("leiras: %s\n", akt->leiras);
+			printf("op1 leiras: %s\n", akt->op1_leiras);
+			printf("op2 leiras: %s\n", akt->op2_leiras);
+			printf("szukseges targy 1: %s\n", akt->szuks_targy);
+			printf("plusz/minusz targy op1: %s\n", akt->plusz_minusz_targy);
+			printf("hova op1: %d\n", akt->hova_op1);
+			printf("hova op2: %d\n", akt->hova_op2);
+			printf("mi tortenik op1: %s\n", akt->mi_tort_op1);
+			printf("mi tortenik op2: %s\n", akt->mi_tort_op2);
+			printf("----------------------------uj sor---------------------\n");
+			akt = akt->kov;
+		}
 	}
-
+	//kiir(elso, 4);
+	jatek(elso);
 
 }
 
@@ -141,20 +152,16 @@ void szetszed(char s[], struct list *akt) {		//szétszedi a stringbe fájlból b
 		case 4:
 			strcpy(akt->op2_leiras, string);
 		case 5:
-			strcpy(akt->szuks_targy_op1, string);
+			strcpy(akt->szuks_targy, string);
 		case 6:
-			strcpy(akt->szuks_targy_op2, string);
+			strcpy(akt->plusz_minusz_targy, string);
 		case 7:
-			strcpy(akt->plusz_minusz_targy_op1, string);
-		case 8:
-			strcpy(akt->plusz_minusz_targy_op2, string);
-		case 9:
 			akt->hova_op1 = atoi(string);
-		case 10:
+		case 8:
 			akt->hova_op2 = atoi(string);
-		case 11:
+		case 9:
 			strcpy(akt->mi_tort_op1, string);
-		case 12:
+		case 10:
 			strcpy(akt->mi_tort_op2, string);
 		}
 		k++;
@@ -167,7 +174,7 @@ int ellenoriz(char s[]) { //leellenőrzi, hogy az adott helyen megfelelő karakt
 	char string[MAX];
 	int i = 0, j, k = 0, c;
 
-	printf("%s\n", s);
+	/*printf("%s\n", s);*/
 
 	do {
 		j = 0;
@@ -176,20 +183,20 @@ int ellenoriz(char s[]) { //leellenőrzi, hogy az adott helyen megfelelő karakt
 			j++;
 		}
 		string[j] = '\0';								//lezárja a stringet ha eléri a ;-t vagy sorvéget
-		printf("%s\n", string);
+		if (DEBUG) printf("%s\n", string);
 
-		if (k == 0 || k==9 || k==10) {  //sorszám mező, tovább ugrások mezők helyességének ellenőrzése
+		if (k == 0 || k==7 || k==8) {  //sorszám mező, tovább ugrások mezők helyességének ellenőrzése
 			for (c = 0; string[c] != '\0'; c++) {
-				if (string[c] <'0' || string[c]>'9') return 0;
+				if ((string[c] <'0' || string[c]>'9' ) && string[c] != '-') return 0;
 			}
 		}
 		
-		else if (k == 5 || k==6) { //szükséges tárgyak nevének ellenőrzése
+		else if (k == 5) { //szükséges tárgyak nevének ellenőrzése
 			for (c = 0; string[c] != '\0'; c++) {
 				if ((string[c]< '0' || string[c]> '9') && string[c] != ' ' && !magyarbetu(string[c])) return 0;
 			}
 		}
-		else if (k == 7 || k==8) { // +/- tárgyak mezők ellenőrzése
+		else if (k == 6) { // +/- tárgyak mezők ellenőrzése
 			for (c = 0; string[c] != '\0'; c++) {
 				if ((string[c]< '0' || string[c]> '9') && string[c] != '-' && string[c] != '+' && string[c] != ' ' && !magyarbetu(string[c])) return 0;
 			}
@@ -200,4 +207,66 @@ int ellenoriz(char s[]) { //leellenőrzi, hogy az adott helyen megfelelő karakt
 	} while (s[i] != '\0' && s[i] != '\n');
 
 	return 1;
+}
+
+void kiir(lista *elso,int szam) {				//függvény, amely kiírja a megadott lista elemet
+	lista *akt;
+
+	akt = elso;
+	while ((akt != NULL) && (akt->sorszam != szam)) {
+		akt = akt->kov;
+	}
+	system("cls");
+	printf("\t\t\t%s\n\n", akt->helyszin);								//helyszín kiírása
+	printf("%s\n\n", akt->leiras);										//leírás kiírása
+	printf("1. %s\n2. %s\n", akt->op1_leiras, akt->op2_leiras);			//választási lehetőségek kiírása
+
+}
+
+int opvalasztas(){						//opció választás, ahol az '1'  és a '2'  az elfogadott
+	char c;
+	do {
+		c=_getche();					//bekérjük a konzolablakból a számok, amelyiket választjuk
+		if (c == '1') return 1;
+		else if (c == '2') return 2;		
+	} while (1);
+}
+
+int targyell(targyak *elso,char  string[]) {		//leellenőrzi, hogy benne van-e a tárgy, ha nincs akkor hozzáadja
+	targyak *akt;
+	akt = elso;
+	while (akt != NULL) {
+
+		akt = akt->kov;
+
+	}
+
+}
+
+int targyhozzaad() {
+
+
+}
+
+void jatek(lista *elso) {				//játék függvény
+	targyak *mut = NULL;
+	lista *akt;
+	int aktsorszam=1;
+
+	do {
+		system("cls");				//felület letörlése
+		akt = elso;
+		while (akt->sorszam != aktsorszam) akt = akt->kov; //ide lehet kell meg a NULL ellenorzes
+
+		kiir(elso, aktsorszam);
+		if (opvalasztas() == 1) aktsorszam = akt->hova_op1;		//ha 1-est választjuk oda ugrik ahova az egyes opció után kell
+		else aktsorszam = akt->hova_op2;						//ha 2-esz választjuk ida ugrik ahova a kettes opció után kell
+
+
+
+
+
+	} while (aktsorszam != -1);				//azért -1, mert akkor lép ki a játékból
+
+
 }
