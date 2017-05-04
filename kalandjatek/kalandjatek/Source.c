@@ -258,7 +258,7 @@ void kiir(lista *elso,int szam) {				//függvény, amely kiírja a megadott list
 	system("cls");
 	printf("\t\t\t%s\n\n", akt->helyszin);								//helyszín kiírása
 	printf("%s\n\n", akt->leiras);										//leírás kiírása
-	printf("1. %s\n2. %s\n", akt->op1_leiras, akt->op2_leiras);			//választási lehetőségek kiírása
+	if (akt->hova_op1 != 0) printf("1. %s\n2. %s\n", akt->op1_leiras, akt->op2_leiras);			//választási lehetőségek kiírása , kivéve ha vége a játéknak
 
 }
 
@@ -301,8 +301,17 @@ int jatek(lista *elso) {				//játék függvény
 
 		kiir(elso, aktsorszam);
 		op = opvalasztas();
-		if (op == 1) aktsorszam = akt->hova_op1;		//ha 1-est választjuk oda ugrik ahova az egyes opció után kell
-		else if(op == 2) aktsorszam = akt->hova_op2;						//ha 2-esz választjuk ida ugrik ahova a kettes opció után kell
+		if (op == 1) {
+			aktsorszam = akt->hova_op1;
+			printf("\n%s\n\n", akt->mi_tort_op1);  //kiírja mi történik ennél az opciónál 
+			//késleltés kell vagy valami
+		} 
+		//ha 1-est választjuk oda ugrik ahova az egyes opció után kell
+		else if (op == 2) {
+			aktsorszam = akt->hova_op2;   //ha 2-esz választjuk ida ugrik ahova a kettes opció után kell
+			printf("\n%s\n\n", akt->mi_tort_op2); //kiírja mi történik ennél az opciónál 
+	
+		}
 		else return -1; //KILEPES
 
 
