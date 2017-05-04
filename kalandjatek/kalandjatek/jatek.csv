@@ -6,4 +6,4 @@
 6;Kovács;Találkozol egy kováccsal aki kardokat árul. Veszel egyet?;Igen;Nem;arany;arany-kard+;7;7;A nálad lévõ aranyból veszel egy kardot majd folytatod utad;Nem veszel semmit ás tovább indulsz.
 7;Csontváz;Egy élõ csontvázzal találkozol, látod hogy nála van 1 totem. Õ nem lát téged.;Kardoddal párat suhintasz és a csontváz darabokban hever a földön. A totem ami nála volt, a tiéd.;Nincs fegyvered! Anélkül nem tudod megszerezni a totemet és tovább sem tudsz menni.;kard;totem+;8;1;Felveszed a totemet, és tovább haladsz az alagútban;Vissza kell fordulnod
 8;Kijárat;Megtaláltad a kifelé vezetõ ajtót, 3 totem kell hogy kinyíljon.;A 3 totemet behelyezed a 3 vályatba és kinyílik az ajtó;Még nem szerezted meg, az összes totemet. Gyere vissza késõbb.;3totem;;9;1;Kimész az ajtón;Vissza kell fordulnod
-9;Vége;Vége a játéknak. Sikeresen kiszabadultál. ;;;;;-1;-1;;
+9;Vége;Vége a játéknak. Sikeresen kiszabadultál. ;;;;;0;0;;
