@@ -138,7 +138,7 @@ int main() {
 
 void szetszed(char s[], struct list *akt) {		//szétszedi a stringbe fájlból beolvasott dolgokat láncolt listába
 	char string[MAX];
-	int i=0,j,k=0;
+	int i = 0, j, k = 0;
 	do {
 		j = 0;
 		for (; s[i] != '\0' && s[i] != '\n' && s[i] != ';'; i++) {	//ciklus, ami ;-ig vagy sorvégig megy 
@@ -146,10 +146,10 @@ void szetszed(char s[], struct list *akt) {		//szétszedi a stringbe fájlból b
 			j++;
 		}
 		string[j] = '\0';/*									//lezárja a stringet ha eléri a ;-t vagy sorvéget
-		printf("%s\n", string);*/
-		
-		switch (k){							//van egy változó és egyes esetekben ,,case,,-ekben mit kell csinálni
-		case 0: 
+						 printf("%s\n", string);*/
+
+		switch (k) {							//van egy változó és egyes esetekben ,,case,,-ekben mit kell csinálni
+		case 0:
 			akt->sorszam = atoi(string);
 		case 1:
 			strcpy(akt->helyszin, string);
@@ -193,12 +193,12 @@ int ellenoriz(char s[]) { //leellenőrzi, hogy az adott helyen megfelelő karakt
 		string[j] = '\0';								//lezárja a stringet ha eléri a ;-t vagy sorvéget
 		if (DEBUG) printf("%s\n", string);
 
-		if (k == 0 || k==7 || k==8) {  //sorszám mező, tovább ugrások mezők helyességének ellenőrzése
+		if (k == 0 || k == 7 || k == 8) {  //sorszám mező, tovább ugrások mezők helyességének ellenőrzése
 			for (c = 0; string[c] != '\0'; c++) {
-				if ((string[c] <'0' || string[c]>'9' ) && string[c] != '-') return 0;
+				if ((string[c] <'0' || string[c]>'9') && string[c] != '-') return 0;
 			}
 		}
-		
+
 		else if (k == 5) { //szükséges tárgyak nevének ellenőrzése
 			for (c = 0; string[c] != '\0'; c++) {
 				if ((string[c]< '0' || string[c]> '9') && string[c] != ' ' && !magyarbetu(string[c])) return 0;
@@ -219,7 +219,7 @@ int ellenoriz(char s[]) { //leellenőrzi, hogy az adott helyen megfelelő karakt
 
 int sorszamell(struct lista *elso) {		//átrakja a sorszámokat egy ,,sorszamok,, listába, ahol majd megnézi, hogy az op1 és op2 benne vannak-e
 	lista *akt1 = NULL, *akt2 = NULL;
-	
+
 	akt1 = elso;	//op1 es op2
 	while (akt1 != NULL) {
 		if (akt1->hova_op1 != 0 && akt1->hova_op2 != 0) {
@@ -243,7 +243,7 @@ int sorszamell(struct lista *elso) {		//átrakja a sorszámokat egy ,,sorszamok,
 }
 
 
-void kiir(lista *elso,int szam) {				//függvény, amely kiírja a megadott lista elemet
+void kiir(lista *elso, int szam) {				//függvény, amely kiírja a megadott lista elemet
 	lista *akt;
 
 	akt = elso;
@@ -252,15 +252,16 @@ void kiir(lista *elso,int szam) {				//függvény, amely kiírja a megadott list
 	}
 	system("cls");
 	printf("\t\t\t%s\n\n", akt->helyszin);								//helyszín kiírása
-	printf("%s\n\n", akt->leiras);										//leírás kiírása
-	printf("1. %s\n2. %s\n", akt->op1_leiras, akt->op2_leiras);			//választási lehetőségek kiírása
+	printf("%s\n\n", akt->leiras);									//leírás kiírása
+	if (akt->hova_op1 != 0) printf("1. %s\n2. %s\n", akt->op1_leiras, akt->op2_leiras);			//választási lehetőségek kiírása , kivéve ha vége a játéknak
+
 
 }
 
-int opvalasztas(){						//opció választás, ahol az '1'  és a '2'  az elfogadott
+int opvalasztas() {						//opció választás, ahol az '1'  és a '2'  az elfogadott
 	char c;
 	do {
-		c=_getche();	//bekérjük a konzolablakból a számok, amelyiket választjuk
+		c = _getche();	//bekérjük a konzolablakból a számok, amelyiket választjuk
 		putchar('\n');
 		if (c == '1') return 1;
 		else if (c == '2') return 2;
@@ -268,8 +269,8 @@ int opvalasztas(){						//opció választás, ahol az '1'  és a '2'  az elfogad
 	} while (1);
 }
 
-int targyell(targyak *elso,char  string[]) {		//leellenőrzi, hogy benne van-e a tárgy, ha nincs akkor hozzáadja
-	int i,j=0;
+int targyell(targyak *elso, char  string[]) {		//leellenőrzi, hogy benne van-e a tárgy, ha nincs akkor hozzáadja
+	int i, j = 0;
 	char szam[20];
 	char targy[100];
 	targyak *akt;
@@ -294,6 +295,7 @@ int targyell(targyak *elso,char  string[]) {		//leellenőrzi, hogy benne van-e a
 	}
 
 
+
 	while (akt != NULL) {
 		if (!strcmp(akt->nev, string) == 0) {
 
@@ -312,7 +314,7 @@ int targyhozzaad() {
 int jatek(lista *elso) {				//játék függvény
 	targyak *mut = NULL;
 	lista *akt;
-	int aktsorszam=1;
+	int aktsorszam = 1;
 	int op;
 
 	do {
@@ -322,10 +324,18 @@ int jatek(lista *elso) {				//játék függvény
 
 		kiir(elso, aktsorszam);
 		op = opvalasztas();
-		if (op == 1) aktsorszam = akt->hova_op1;		//ha 1-est választjuk oda ugrik ahova az egyes opció után kell
-		else if(op == 2) aktsorszam = akt->hova_op2;						//ha 2-esz választjuk ida ugrik ahova a kettes opció után kell
-		else return -1; //KILEPES
+		if (op == 1) {
+			aktsorszam = akt->hova_op1;
+			printf("\n%s\n\n", akt->mi_tort_op1);  //kiírja mi történik ennél az opciónál 
+												   //késleltés kell vagy valami
+		}
+		//ha 1-est választjuk oda ugrik ahova az egyes opció után kell
+		else if (op == 2) {
+			aktsorszam = akt->hova_op2;   //ha 2-esz választjuk ida ugrik ahova a kettes opció után kell
+			printf("\n%s\n\n", akt->mi_tort_op2); //kiírja mi történik ennél az opciónál 
 
+		}
+		else return -1; //KILEPES
 
 
 
