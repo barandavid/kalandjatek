@@ -1,18 +1,18 @@
 ﻿  Source.c
-c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(110): warning C4133: '=': incompatible types - from 'lista *' to 'lista *'
-c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(117): warning C4133: 'function': incompatible types - from 'lista *' to 'lista *'
-c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(136): warning C4133: '=': incompatible types - from 'lista *' to 'lista *'
-c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(228): warning C4133: '=': incompatible types - from 'lista *' to 'lista *'
-c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(231): warning C4133: '=': incompatible types - from 'lista *' to 'lista *'
-c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(232): warning C4133: '=': incompatible types - from 'lista *' to 'lista *'
-c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(238): warning C4133: '=': incompatible types - from 'lista *' to 'lista *'
-c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(239): warning C4133: '=': incompatible types - from 'lista *' to 'lista *'
-c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(245): warning C4133: '=': incompatible types - from 'lista *' to 'lista *'
-c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(256): warning C4133: '=': incompatible types - from 'lista *' to 'lista *'
-c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(268): warning C4013: '_getche' undefined; assuming extern returning int
-c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(280): warning C4133: '=': incompatible types - from 'targyak *' to 'targyak *'
-c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(300): warning C4133: '=': incompatible types - from 'lista *' to 'lista *'
-c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(284): warning C4716: 'targyell': must return a value
-c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(289): warning C4716: 'targyhozzaad': must return a value
-c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(324): warning C4715: 'jatek': not all control paths return a value
+c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(106): warning C4133: '=': incompatible types - from 'lista *' to 'lista *'
+c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(113): warning C4133: 'function': incompatible types - from 'lista *' to 'lista *'
+c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(132): warning C4133: '=': incompatible types - from 'lista *' to 'lista *'
+c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(223): warning C4133: '=': incompatible types - from 'lista *' to 'lista *'
+c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(226): warning C4133: '=': incompatible types - from 'lista *' to 'lista *'
+c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(227): warning C4133: '=': incompatible types - from 'lista *' to 'lista *'
+c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(233): warning C4133: '=': incompatible types - from 'lista *' to 'lista *'
+c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(234): warning C4133: '=': incompatible types - from 'lista *' to 'lista *'
+c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(240): warning C4133: '=': incompatible types - from 'lista *' to 'lista *'
+c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(251): warning C4133: '=': incompatible types - from 'lista *' to 'lista *'
+c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(264): warning C4013: '_getche' undefined; assuming extern returning int
+c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(304): warning C4133: '=': incompatible types - from 'targyak *' to 'targyak *'
+c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(323): warning C4133: '=': incompatible types - from 'lista *' to 'lista *'
+c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(312): warning C4716: 'targyhozzaad': must return a value
+c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(346): warning C4715: 'jatek': not all control paths return a value
+c:\users\péter\source\repos\kalandjatek\kalandjatek\kalandjatek\source.c(307): warning C4715: 'targyell': not all control paths return a value
   kalandjatek.vcxproj -> C:\Users\Péter\Source\Repos\kalandjatek\kalandjatek\x64\Debug\kalandjatek.exe
