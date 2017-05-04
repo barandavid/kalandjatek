@@ -57,7 +57,7 @@ void kiir(lista * elso, int szam);
 int opvalasztas();
 int jatek(lista *elso);
 int sorszamell(struct lista *elso);
-int targyell(targyak *elso, char  string[], int darabszam);
+int targyell(targyak *elso, char  string[]);
 
 int getline(char s[], int n) {
 	int c, i;
@@ -292,7 +292,6 @@ int targyell(targyak *elso,char  string[]) {		//leellenőrzi, hogy benne van-e a
 		}
 		targy[j] = '\0';
 	}
-
 
 
 	while (akt != NULL) {
