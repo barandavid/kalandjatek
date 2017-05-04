@@ -28,11 +28,6 @@ typedef struct targy {				//tárgyak listája
 	struct targyak *kov;
 }targyak;
 
-typedef struct sorszamok {
-	int szamok;
-	struct sorszamok *kov;
-}sorszamok;
-
 
 int ekezet(char c) {
 	//egy karakter ellenorzese, hogy ekezetes karakter-e
@@ -62,6 +57,7 @@ void kiir(lista * elso, int szam);
 int opvalasztas();
 int jatek(lista *elso);
 int sorszamell(struct lista *elso);
+int targyell(targyak *elso, char  string[], int darabszam);
 
 int getline(char s[], int n) {
 	int c, i;
@@ -80,16 +76,16 @@ int main() {
 	system("chcp 1250");			//ékezetes betűket is ki tudjunk írni
 	system("cls");					//letörli a felületet
 
-	fp = fopen("jatek.csv", "r");
+	fp = fopen("jatek.csv", "r");			//olvasásra nyitjuk meg a CSV-t
 
 	if (fp == NULL) {
 		printf("Hiba a fajl megnyitasakor! \n");
 		return 0;
 	}
 
-	/*ellenőrzés ide kell majd */
+
 	while (!feof(fp)) {
-		fgets(st, MAX, fp);
+		fgets(st, MAX, fp);				//soronként beolvas
 		if (ellenoriz(st) == 0) {
 			printf("Rossz volt a csv formátuma \n");
 			return 0;
@@ -138,7 +134,6 @@ int main() {
 	}
 	//kiir(elso, 4);
 	if (!jatek(elso)) return 0;
-
 }
 
 void szetszed(char s[], struct list *akt) {		//szétszedi a stringbe fájlból beolvasott dolgokat láncolt listába
@@ -229,16 +224,16 @@ int sorszamell(struct lista *elso) {		//átrakja a sorszámokat egy ,,sorszamok,
 	while (akt1 != NULL) {
 		if (akt1->hova_op1 != 0 && akt1->hova_op2 != 0) {
 			akt2 = elso;
-			while (akt2 != NULL && (akt2->sorszam != akt1->hova_op1)) akt2 = akt2->kov; //ameg nincs vege a listanak ES nem talaltunk ilyen sorszamot
+			while (akt2 != NULL && (akt2->sorszam != akt1->hova_op1)) akt2 = akt2->kov; //amíg nincs vege a listanak ES nem talaltunk ilyen sorszamot
 			if (akt2 == NULL) {
-				printf("op1 %d\n", akt1->sorszam);
+				if (DEBUG) printf("op1 %d\n", akt1->sorszam); //csak azért kell, ha hibát keresünk
 				return 0; //az op1_hova nem volt talalhato a palya sorszamok kozott
 			}
 
 			akt2 = elso;
 			while (akt2 != NULL && (akt2->sorszam != akt1->hova_op2)) akt2 = akt2->kov; //ameg nincs vege a listanak ES nem talaltunk ilyen sorszamot
 			if (akt2 == NULL) {
-				printf("op2 %d\n", akt1->sorszam);
+				if (DEBUG) printf("op2 %d\n", akt1->sorszam); //csak azért kell, ha hibát keresünk
 				return 0; //az op2_hova nem volt talalhato a palya sorszamok kozott
 			}
 		}
@@ -265,7 +260,8 @@ void kiir(lista *elso,int szam) {				//függvény, amely kiírja a megadott list
 int opvalasztas(){						//opció választás, ahol az '1'  és a '2'  az elfogadott
 	char c;
 	do {
-		c=_getche();					//bekérjük a konzolablakból a számok, amelyiket választjuk
+		c=_getche();	//bekérjük a konzolablakból a számok, amelyiket választjuk
+		putchar('\n');
 		if (c == '1') return 1;
 		else if (c == '2') return 2;
 		else if (c == 'x') return 0;			//x-re kilép a program
@@ -273,12 +269,38 @@ int opvalasztas(){						//opció választás, ahol az '1'  és a '2'  az elfogad
 }
 
 int targyell(targyak *elso,char  string[]) {		//leellenőrzi, hogy benne van-e a tárgy, ha nincs akkor hozzáadja
+	int i,j=0;
+	char szam[20];
+	char targy[100];
 	targyak *akt;
 	akt = elso;
+
+	for (i = 0; string[i] != '\0'; i++) {
+		if (string[i] >= '0' && string[i] <= '9') {
+			szam[j] = string[i];
+			j++;
+		}
+		szam[j] = '\0';
+	}
+
+	i = 0;
+	j = 0;
+	for (i = 0; string[i] != '\0'; i++) {
+		if (string[i] < '0' && string[i] > '9') {
+			targy[j] = string[i];
+			j++;
+		}
+		targy[j] = '\0';
+	}
+
+
+
 	while (akt != NULL) {
+		if (!strcmp(akt->nev, string) == 0) {
+
+		}
 
 		akt = akt->kov;
-
 	}
 
 }
@@ -313,3 +335,14 @@ int jatek(lista *elso) {				//játék függvény
 
 
 }
+
+
+/*
+kell még:
+tárgyellenőrzés
+tárgy hozzáadás
+aktuális pozíció lementése egy txt-be, amit később onnan lehet tovább folytatni
+op1 és op2 szövegének kiíárása, attól függ mit választott, ahhoz írja ki a szöveget
+kilépés: 1. vissza mész az elejére 2.kilépés.. és kilép az egész programból
+CSV rendes átírása, hogy értelmes legyen
+*/
