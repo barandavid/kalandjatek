@@ -4,7 +4,7 @@
 #include <Windows.h>
 
 #define MAX 1000
-#define DEBUG 0				//arra való, hogyha ez 1-esre állítjuk tudunk vele kiíratni kívánt elemeket
+#define DEBUG 2				//arra való, hogyha ez 1-esre állítjuk tudunk vele kiíratni kívánt elemeket
 
 
 typedef struct list {			//lista, ahova beolvasom majd a dolgokat
@@ -58,6 +58,8 @@ int opvalasztas();
 int jatek(lista *elso);
 int sorszamell(struct lista *elso);
 int targyell(targyak *elso, char  string[]);
+int targyhozzaad(targyak  *elso, char s[]);
+void debug_targylista(targyak *elso);
 
 int getline(char s[], int n) {
 	int c, i;
@@ -114,7 +116,7 @@ int main() {
 		printf("Hibas sorszam!\n");
 		return 0;
 	}
-	if (DEBUG) {
+	if (DEBUG == 1) {
 		akt = elso;							//lista bejárás
 		while (akt != NULL) {
 			printf("sorszam: %d\n", akt->sorszam);
@@ -191,7 +193,7 @@ int ellenoriz(char s[]) { //leellenőrzi, hogy az adott helyen megfelelő karakt
 			j++;
 		}
 		string[j] = '\0';								//lezárja a stringet ha eléri a ;-t vagy sorvéget
-		if (DEBUG) printf("%s\n", string);
+		if (DEBUG == 1) printf("%s\n", string);
 
 		if (k == 0 || k == 7 || k == 8) {  //sorszám mező, tovább ugrások mezők helyességének ellenőrzése
 			for (c = 0; string[c] != '\0'; c++) {
@@ -206,6 +208,7 @@ int ellenoriz(char s[]) { //leellenőrzi, hogy az adott helyen megfelelő karakt
 		}
 		else if (k == 6) { // +/- tárgyak mezők ellenőrzése
 			for (c = 0; string[c] != '\0'; c++) {
+				//FOYLTATNI )targyhozzaadas: szam - nev - +-
 				if ((string[c]< '0' || string[c]> '9') && string[c] != '-' && string[c] != '+' && string[c] != ' ' && !magyarbetu(string[c])) return 0;
 			}
 		}
@@ -226,14 +229,14 @@ int sorszamell(struct lista *elso) {		//átrakja a sorszámokat egy ,,sorszamok,
 			akt2 = elso;
 			while (akt2 != NULL && (akt2->sorszam != akt1->hova_op1)) akt2 = akt2->kov; //amíg nincs vege a listanak ES nem talaltunk ilyen sorszamot
 			if (akt2 == NULL) {
-				if (DEBUG) printf("op1 %d\n", akt1->sorszam); //csak azért kell, ha hibát keresünk
+				if (DEBUG == 1) printf("op1 %d\n", akt1->sorszam); //csak azért kell, ha hibát keresünk
 				return 0; //az op1_hova nem volt talalhato a palya sorszamok kozott
 			}
 
 			akt2 = elso;
 			while (akt2 != NULL && (akt2->sorszam != akt1->hova_op2)) akt2 = akt2->kov; //ameg nincs vege a listanak ES nem talaltunk ilyen sorszamot
 			if (akt2 == NULL) {
-				if (DEBUG) printf("op2 %d\n", akt1->sorszam); //csak azért kell, ha hibát keresünk
+				if (DEBUG == 1) printf("op2 %d\n", akt1->sorszam); //csak azért kell, ha hibát keresünk
 				return 0; //az op2_hova nem volt talalhato a palya sorszamok kozott
 			}
 		}
@@ -250,11 +253,15 @@ void kiir(lista *elso, int szam) {				//függvény, amely kiírja a megadott lis
 	while ((akt != NULL) && (akt->sorszam != szam)) {
 		akt = akt->kov;
 	}
-	system("cls");
-	printf("\t\t\t%s\n\n", akt->helyszin);								//helyszín kiírása
-	printf("%s\n\n", akt->leiras);										//leírás kiírása
-	printf("1. %s\n2. %s\n", akt->op1_leiras, akt->op2_leiras);			//választási lehetőségek kiírása
-
+	if (akt->hova_op1 == 0) {
+		printf("Vége a játéknak!");
+	}
+	else {
+		system("cls");
+		printf("\t\t\t%s\n\n", akt->helyszin);								//helyszín kiírása
+		printf("%s\n\n", akt->leiras);										//leírás kiírása
+		printf("1. %s\n2. %s\n", akt->op1_leiras, akt->op2_leiras);			//választási lehetőségek kiírása
+	}
 }
 
 int opvalasztas() {						//opció választás, ahol az '1'  és a '2'  az elfogadott
@@ -270,44 +277,128 @@ int opvalasztas() {						//opció választás, ahol az '1'  és a '2'  az elfoga
 
 int targyell(targyak *elso, char  string[]) {		//leellenőrzi, hogy benne van-e a tárgy, ha nincs akkor hozzáadja
 	int i, j = 0;
-	char szam[20];
-	char targy[100];
+	char szam[50];
+	char targy[1000];
+	int plusz = 0;		//ha plusz==1, akkor novelunk, ha 0 akkor kivonunk
 	targyak *akt;
-	akt = elso;
-
-	for (i = 0; string[i] != '\0'; i++) {
+	
+	for (i = 0; string[i] != '\0'; i++) {						//szam stringbe teszi a darabszámot
 		if (string[i] >= '0' && string[i] <= '9') {
 			szam[j] = string[i];
 			j++;
 		}
-		szam[j] = '\0';
+		
 	}
-
+	szam[j] = '\0';
 	i = 0;
 	j = 0;
-	for (i = 0; string[i] != '\0'; i++) {
-		if (string[i] < '0' && string[i] > '9') {
+	for (i = 0; string[i] != '\0'; i++) {						//targy stringbe teszi a targyat
+		if (string[i] < '0' || string[i] > '9') {
 			targy[j] = string[i];
 			j++;
 		}
-		targy[j] = '\0';
+		
 	}
+	targy[j] = '\0';
 
-
-
+	akt = elso;
 	while (akt != NULL) {
-		if (!strcmp(akt->nev, string) == 0) {
-
+		if (!strcmp(akt->nev, targy) && akt->drb>=atoi(szam)) {						//ha már van ilyen tárgy, akkor a darabszámot megnöveli egyel
+			return 1;	//van iylen targy (es van annyi db)
 		}
-
 		akt = akt->kov;
 	}
-
+	return 0;	//nincs ilyen targy, vagy nincs annyi db
 }
 
-int targyhozzaad() {
+int targyhozzaad(targyak  *elso, char s[]) {
+	targyak *akt, *temp;
+	akt = elso;
+	char szam[50];
+	char targy[1000];
+	int plusz;
+	int i, j;
+	int volt;
+
+	if (s[0] == '\0') return 1;
+
+	i = 0;
+	do{
+		plusz = j = 0;
+		//pl.: 3arany-2kard+
+		// string (targy) darabokra bontasa
+		for (; s[i] >= '0' && s[i] <= '9' && s[i] != '\0'; i++) {
+			szam[j] = s[i];
+			j++;
+		}
+
+		szam[j] = '\0';
+
+		//i = 0;
+		j = 0;
+		for (; s[i] != '\0' && s[i] != '+' &&s[i] != '-'; i++) {						//targy stringbe teszi a targyat
+			targy[j] = s[i];
+			j++;
+		}
+		targy[j] = '\0';
+
+		//hozzaadjunk vagy kivonjunk?
+
+		if (s[i] == '+') plusz++;
 
 
+		akt = elso;
+		volt = 0;
+		while (akt != NULL && !volt) {
+			if (!strcmp(akt->nev, targy)) {						//ha már van ilyen tárgy, akkor a darabszámot megnöveli egyel
+				if (plusz) {
+					akt->drb += atoi(szam);
+					volt++;
+				}
+				else {				//kivonas lesz
+					if ((akt->drb - atoi(szam)) < 0) return 0;
+					else {
+						akt->drb -= atoi(szam);
+						volt++;
+					}
+				}
+			}
+			if (!volt) akt = akt->kov;
+		}
+
+		if (akt == NULL) {		//akkor lesz NULL, ha nem talaltunk ilyen targyat a listaban, VAGY meg nincs egy targyunk sem
+			akt = elso;
+			if (akt == NULL) {	//NINCS MEG TARGYUNK
+				akt = calloc(1, sizeof(targyak));
+				elso = akt;
+				akt->kov = NULL;
+				strcpy(akt->nev, targy);
+				akt->drb = atoi(szam);
+			}
+			else {
+
+				while (akt->kov != NULL) akt = akt->kov;
+
+				temp = calloc(1, sizeof(targyak));
+				//ellenorzes, hogy sikerult-e lefoglalni
+				strcpy(temp->nev, targy);
+				temp->drb = atoi(szam);
+
+				akt->kov = temp;
+				temp->kov = NULL;
+			}
+		}
+
+		i++;	//a kovetkezo resz kezdese (vagy a \0)
+
+		if (DEBUG == 2) {
+			printf("TARGY HOZZAADVA: %s %s db\n", targy, szam);
+		}
+
+	}while (s[i] != '\0');
+
+	return 1;
+	
 }
 
 int jatek(lista *elso) {				//játék függvény
@@ -316,14 +407,64 @@ int jatek(lista *elso) {				//játék függvény
 	int aktsorszam = 1;
 	int op;
 
+	mut = calloc(1, sizeof(targyak));
+	mut->kov = NULL;
 	do {
 		system("cls");				//felület letörlése
 		akt = elso;
 		while (akt->sorszam != aktsorszam) akt = akt->kov; //ide lehet kell meg a NULL ellenorzes
 
 		kiir(elso, aktsorszam);
-		op = opvalasztas();
-		if (op == 1) aktsorszam = akt->hova_op1;		//ha 1-est választjuk oda ugrik ahova az egyes opció után kell
+		op = opvalasztas();		//1   vagy  2 a visszateres
+		if (op == 1) {
+			if (akt->szuks_targy[0] == '\0')		// ha nincs a tovabblepesnek feltetele
+			{
+				if (DEBUG == 2) {
+					printf("nincs a tovabblepesnek feltetele\n");
+					system("pause");
+				}
+				if(targyhozzaad(mut,akt->plusz_minusz_targy)) aktsorszam = akt->hova_op1;		//ha 1-est választjuk oda ugrik ahova az egyes opció után kell
+				else {
+					//gaz volt a targy hozzaadasanal
+					if (DEBUG == 2) {
+						printf("gaz volt a targy hozzaadasanal\n");
+						system("pause");
+					}
+					aktsorszam = akt->hova_op1;
+				}
+			}
+			else {		//ha van a tovabblepesnek feltetele
+				if (targyell(mut, akt->szuks_targy)) {				//ha megvan a szukseges targy es a kello darabszam
+					
+					if (!targyhozzaad(mut, akt->plusz_minusz_targy)) {
+						if (DEBUG == 2) {
+							printf("para volt a targyhozzaadasnal\n");
+							system("pause");
+						}
+
+					}
+					if (DEBUG == 2) {
+						printf("van a tovabblepesnek feltetele, es teljesult\n");
+						debug_targylista(mut);
+						system("pause");
+					}
+					aktsorszam = akt->hova_op1;		//ha 1-est választjuk oda ugrik ahova az egyes opció után kell
+					
+				}
+				else {			// ha nincs meg a kello targy vagy nincs annyi db belole
+					if (DEBUG == 2) {
+						printf("van a tovabblepesnek feltetele, de nem teljesult\n");
+						debug_targylista(mut);
+						system("pause");
+					}
+					aktsorszam = akt->hova_op2;
+					if (DEBUG == 2) {
+						printf("Nincs ilyen targy, vagy nincs ennyi db.");
+						system("pause");
+					}
+				}
+			}
+		}
 		else if (op == 2) aktsorszam = akt->hova_op2;						//ha 2-esz választjuk ida ugrik ahova a kettes opció után kell
 		else return -1; //KILEPES
 
@@ -336,6 +477,16 @@ int jatek(lista *elso) {				//játék függvény
 
 }
 
+void debug_targylista(targyak *elso) {
+	targyak *akt;
+
+	akt = elso;
+	printf("TARGYLISTA: ");
+	while (akt != NULL) {
+		printf("%s %d db, ", akt->nev, akt->drb);
+		akt = akt->kov;
+	}
+}
 
 /*
 kell még:
@@ -345,4 +496,9 @@ aktuális pozíció lementése egy txt-be, amit később onnan lehet tovább fol
 op1 és op2 szövegének kiíárása, attól függ mit választott, ahhoz írja ki a szöveget
 kilépés: 1. vissza mész az elejére 2.kilépés.. és kilép az egész programból
 CSV rendes átírása, hogy értelmes legyen
+
+
+volt- ha egy adott pályán már voltál már nem adhat tárgyat   ,majd kiírja, hogy itt már jártál, nem kaphatsz megint ilyen tárgyat
+leellenőrizni a tárgy formátumát
+memóriafoglalás sikerült-e
 */
