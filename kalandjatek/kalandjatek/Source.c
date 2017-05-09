@@ -4,7 +4,7 @@
 #include <Windows.h>
 
 #define MAX 1000
-#define DEBUG 2				//arra való, hogyha ez 1-esre állítjuk tudunk vele kiíratni kívánt elemeket
+#define DEBUG 0				//arra való, hogyha ez 1-esre állítjuk tudunk vele kiíratni kívánt elemeket
 
 
 typedef struct list {			//lista, ahova beolvasom majd a dolgokat
@@ -253,15 +253,15 @@ void kiir(lista *elso, int szam) {				//függvény, amely kiírja a megadott lis
 	while ((akt != NULL) && (akt->sorszam != szam)) {
 		akt = akt->kov;
 	}
-	if (akt->hova_op1 == 0) {
-		printf("Vége a játéknak!");
+	/*if (akt->hova_op1 == 0) {
+		printf("Vége a játéknak!");  //Ezt megváltoztattam úgy hogy a csv-ból írja ki. Bug: Minkettő módon várja az opciókat! 
 	}
-	else {
+	else {*/
 		system("cls");
 		printf("\t\t\t%s\n\n", akt->helyszin);								//helyszín kiírása
 		printf("%s\n\n", akt->leiras);										//leírás kiírása
-		printf("1. %s\n2. %s\n", akt->op1_leiras, akt->op2_leiras);			//választási lehetőségek kiírása
-	}
+		if (akt->hova_op1 != 0) printf("1. %s\n2. %s\n", akt->op1_leiras, akt->op2_leiras);			//választási lehetőségek kiírása
+	//}
 }
 
 int opvalasztas() {						//opció választás, ahol az '1'  és a '2'  az elfogadott
@@ -423,13 +423,19 @@ int jatek(lista *elso) {				//játék függvény
 					printf("nincs a tovabblepesnek feltetele\n");
 					system("pause");
 				}
-				if(targyhozzaad(mut,akt->plusz_minusz_targy)) aktsorszam = akt->hova_op1;		//ha 1-est választjuk oda ugrik ahova az egyes opció után kell
+				if (targyhozzaad(mut, akt->plusz_minusz_targy)) {
+					printf("%s\n", akt->mi_tort_op1);
+					system("pause");
+					aktsorszam = akt->hova_op1;   //ha 1-est választjuk oda ugrik ahova az egyes opció után kell
+				}
 				else {
 					//gaz volt a targy hozzaadasanal
 					if (DEBUG == 2) {
 						printf("gaz volt a targy hozzaadasanal\n");
 						system("pause");
 					}
+					printf("%s\n", akt->mi_tort_op1);
+					system("pause");
 					aktsorszam = akt->hova_op1;
 				}
 			}
@@ -448,6 +454,8 @@ int jatek(lista *elso) {				//játék függvény
 						debug_targylista(mut);
 						system("pause");
 					}
+					printf("%s\n", akt->mi_tort_op1);
+					system("pause");
 					aktsorszam = akt->hova_op1;		//ha 1-est választjuk oda ugrik ahova az egyes opció után kell
 					
 				}
@@ -457,6 +465,9 @@ int jatek(lista *elso) {				//játék függvény
 						debug_targylista(mut);
 						system("pause");
 					}
+					printf("Ehhez az opcióhoz %c %s szükséges! A másik lehetőséget választod.\n", akt->szuks_targy[0] , akt->szuks_targy+1); //ha kell valamilyen tárgy akkor figyelmeztet rá
+					printf("%s\n", akt->mi_tort_op2);
+					system("pause");
 					aktsorszam = akt->hova_op2;
 					if (DEBUG == 2) {
 						printf("Nincs ilyen targy, vagy nincs ennyi db.");
@@ -465,7 +476,11 @@ int jatek(lista *elso) {				//játék függvény
 				}
 			}
 		}
-		else if (op == 2) aktsorszam = akt->hova_op2;						//ha 2-esz választjuk ida ugrik ahova a kettes opció után kell
+		else if (op == 2) {
+			printf("%s\n", akt->mi_tort_op2);
+			system("pause");
+			aktsorszam = akt->hova_op2;  //ha 2-esz választjuk ida ugrik ahova a kettes opció után kell
+		}
 		else return -1; //KILEPES
 
 
@@ -490,12 +505,12 @@ void debug_targylista(targyak *elso) {
 
 /*
 kell még:
-tárgyellenőrzés
-tárgy hozzáadás
+tárgyellenőrzés //Pipa
+tárgy hozzáadás //Pipa
 aktuális pozíció lementése egy txt-be, amit később onnan lehet tovább folytatni
-op1 és op2 szövegének kiíárása, attól függ mit választott, ahhoz írja ki a szöveget
+op1 és op2 szövegének kiíárása, attól függ mit választott, ahhoz írja ki a szöveget //Pipa - PAUSE van használva arra, hogy a szöveget legyen idő elolvasni. Lehet így nem jó
 kilépés: 1. vissza mész az elejére 2.kilépés.. és kilép az egész programból
-CSV rendes átírása, hogy értelmes legyen
+CSV rendes átírása, hogy értelmes legyen //Pipa 
 
 
 volt- ha egy adott pályán már voltál már nem adhat tárgyat   ,majd kiírja, hogy itt már jártál, nem kaphatsz megint ilyen tárgyat
