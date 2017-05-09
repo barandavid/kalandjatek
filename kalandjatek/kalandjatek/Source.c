@@ -4,7 +4,7 @@
 #include <Windows.h>
 
 #define MAX 1000
-#define DEBUG 0				//arra való, hogyha ez 1-esre állítjuk tudunk vele kiíratni kívánt elemeket
+#define DEBUG 2				//arra való, hogyha ez 1-esre állítjuk tudunk vele kiíratni kívánt elemeket
 
 
 typedef struct list {			//lista, ahova beolvasom majd a dolgokat
@@ -20,6 +20,7 @@ typedef struct list {			//lista, ahova beolvasom majd a dolgokat
 	char mi_tort_op1[MAX];
 	char mi_tort_op2[MAX];
 	struct lista *kov;
+	int volt;	//voltunk-e mar az adott palyan (ha igen, nem adunk targyat)
 }lista;
 
 typedef struct targy {				//tárgyak listája
@@ -58,7 +59,7 @@ int opvalasztas();
 int jatek(lista *elso);
 int sorszamell(struct lista *elso);
 int targyell(targyak *elso, char  string[]);
-int targyhozzaad(targyak  *elso, char s[]);
+int targyhozzaad(targyak  *elso, char s[], int voltmar);
 void debug_targylista(targyak *elso);
 
 int getline(char s[], int n) {
@@ -107,6 +108,7 @@ int main() {
 		if (elso == NULL) elso = akt;
 		else temp->kov = akt;
 		akt->kov = NULL;
+		akt->volt = 0;	//kezdeten nem voltunk meg ezen a palyan
 		szetszed(st, akt);
 		temp = akt;
 	}
@@ -328,7 +330,7 @@ int targyell(targyak *elso, char  string[]) {		//leellenőrzi, hogy benne van-e 
 	return 0;	//nincs ilyen targy, vagy nincs annyi db
 }
 
-int targyhozzaad(targyak  *elso, char s[]) {
+int targyhozzaad(targyak  *elso, char s[], int voltmar) {
 	targyak *akt, *temp;
 	akt = elso;
 	char szam[50];
@@ -337,7 +339,7 @@ int targyhozzaad(targyak  *elso, char s[]) {
 	int i, j;
 	int volt;
 
-	if (s[0] == '\0') return 1;
+	if (s[0] == '\0' || voltmar) return 1;	//ures targy (lista elso eleme), vagy voltunk mar a palyan
 
 	i = 0;
 	do{
@@ -410,6 +412,7 @@ int targyhozzaad(targyak  *elso, char s[]) {
 
 		if (DEBUG == 2) {
 			printf("TARGY HOZZAADVA: %s %s db\n", targy, szam);
+			system("pause");
 		}
 
 	}while (s[i] != '\0');
@@ -419,7 +422,7 @@ int targyhozzaad(targyak  *elso, char s[]) {
 }
 
 int jatek(lista *elso) {				//játék függvény
-	targyak *mut = NULL;
+	targyak *mut = NULL;		//targyak lista elso eleme
 	lista *akt;
 	int aktsorszam = 1;
 	int op;
@@ -431,19 +434,27 @@ int jatek(lista *elso) {				//játék függvény
 		akt = elso;
 		while (akt->sorszam != aktsorszam) akt = akt->kov; //ide lehet kell meg a NULL ellenorzes
 
+
+
 		kiir(elso, aktsorszam);
 		op = opvalasztas();		//1   vagy  2 a visszateres
 		if (op == 1) {
 			if (akt->szuks_targy[0] == '\0')		// ha nincs a tovabblepesnek feltetele
 			{
+
 				if (DEBUG == 2) {
 					printf("nincs a tovabblepesnek feltetele\n");
 					system("pause");
 				}
-				if (targyhozzaad(mut, akt->plusz_minusz_targy)) {
+
+				if (targyhozzaad(mut, akt->plusz_minusz_targy, akt->volt)) {
 					printf("%s\n", akt->mi_tort_op1);
 					system("pause");
 					aktsorszam = akt->hova_op1;   //ha 1-est választjuk oda ugrik ahova az egyes opció után kell
+
+
+					  //miutan kikerestuk a palyat, beallitjuk a 'volt' valtozot
+					akt->volt = 1;
 				}
 				else {
 					//gaz volt a targy hozzaadasanal
@@ -454,12 +465,15 @@ int jatek(lista *elso) {				//játék függvény
 					printf("%s\n", akt->mi_tort_op1);
 					system("pause");
 					aktsorszam = akt->hova_op1;
+
+					//miutan kikerestuk a palyat, beallitjuk a 'volt' valtozot
+					akt->volt = 1;
 				}
 			}
 			else {		//ha van a tovabblepesnek feltetele
 				if (targyell(mut, akt->szuks_targy)) {				//ha megvan a szukseges targy es a kello darabszam
 					
-					if (!targyhozzaad(mut, akt->plusz_minusz_targy)) {
+					if (!targyhozzaad(mut, akt->plusz_minusz_targy, akt->volt)) {
 						if (DEBUG == 2) {
 							printf("para volt a targyhozzaadasnal\n");
 							system("pause");
@@ -475,6 +489,9 @@ int jatek(lista *elso) {				//játék függvény
 					system("pause");
 					aktsorszam = akt->hova_op1;		//ha 1-est választjuk oda ugrik ahova az egyes opció után kell
 					
+					//miutan kikerestuk a palyat, beallitjuk a 'volt' valtozot
+					akt->volt = 1;
+					
 				}
 				else {			// ha nincs meg a kello targy vagy nincs annyi db belole
 					if (DEBUG == 2) {
@@ -482,7 +499,7 @@ int jatek(lista *elso) {				//játék függvény
 						debug_targylista(mut);
 						system("pause");
 					}
-					printf("Ehhez az opcióhoz %c %s szükséges! A másik lehetőséget választod.\n", akt->szuks_targy[0] , akt->szuks_targy+1); //ha kell valamilyen tárgy akkor figyelmeztet rá
+					printf("Ehhez az opcióhoz %c %s szükséges! A másik lehetőséget választod.\n", akt->szuks_targy[0] , akt->szuks_targy+1); //ha kell valamilyen tárgy akkor figyelmeztet rá	//EZ ITT NEM LESZ JO PETI (10 vagy tobb targy utan)
 					printf("%s\n", akt->mi_tort_op2);
 					system("pause");
 					aktsorszam = akt->hova_op2;
@@ -522,15 +539,16 @@ void debug_targylista(targyak *elso) {
 
 /*
 kell még:
+Dávid:
 
-aktuális pozíció lementése egy txt-be, amit később onnan lehet tovább folytatni
-op1 és op2 szövegének kiíárása, attól függ mit választott, ahhoz írja ki a szöveget //Pipa - PAUSE van használva arra, hogy a szöveget legyen idő elolvasni. Lehet így nem jó
+- hova_op1_voltmar: ha voltunk mar valahol, nem kapunk targyat, ehhez kell egy uj mezo a csv-ben
 
+- op1 és op2 szövegének kiíárása, attól függ mit választott, ahhoz írja ki a szöveget //Pipa - PAUSE van használva arra, hogy a szöveget legyen idő elolvasni. Lehet így nem jó (MEGOLDÁS: _getche, ez 1 karaktert vár csak meg és azonnal továbbmegy)
 
-volt- ha egy adott pályán már voltál már nem adhat tárgyat   ,majd kiírja, hogy itt már jártál, nem kaphatsz megint ilyen tárgyat
-leellenőrizni a tárgy formátumát--most csináljuk
+Martin:
 
+- parancssori paraméter, hogy CSV vagy MENTÉS, csinálunk egy SAVE fájlt
 
-parancssori paraméter, hogy CSV vagy MENTÉS, csinálunk egy SAVE fájlt
-mentéshez vissza kell állítani a játék elejét
+- mentés
+
 */
