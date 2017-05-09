@@ -183,6 +183,10 @@ void szetszed(char s[], struct list *akt) {		//szétszedi a stringbe fájlból b
 int ellenoriz(char s[]) { //leellenőrzi, hogy az adott helyen megfelelő karakter/szám van-e
 	char string[MAX];
 	int i = 0, j, k = 0, c;
+	char seged[4];
+	int szam = 0;
+	int betu = 0;
+	int plusz_minusz = 0;
 
 	/*printf("%s\n", s);*/
 
@@ -207,9 +211,22 @@ int ellenoriz(char s[]) { //leellenőrzi, hogy az adott helyen megfelelő karakt
 			}
 		}
 		else if (k == 6) { // +/- tárgyak mezők ellenőrzése
+			//pl.: 1kard+21arany-3csont+
+			szam = betu = plusz_minusz = 0;
 			for (c = 0; string[c] != '\0'; c++) {
-				//FOYLTATNI )targyhozzaadas: szam - nev - +-
-				if ((string[c]< '0' || string[c]> '9') && string[c] != '-' && string[c] != '+' && string[c] != ' ' && !magyarbetu(string[c])) return 0;
+				if (string[c] >= '0' && string[c] <= '9') {
+					szam++;
+					if (betu != 0 || plusz_minusz != 0) return 0;
+				}
+				else if (string[c] >= 'a' && string[c] <= 'z') {
+					betu++;
+					if (szam == 0 || plusz_minusz != 0) return 0;
+				}
+				if (string[c] == '+' || string[c] == '-') {
+					plusz_minusz++;
+					if (szam == 0 || betu == 0) return 0;
+					szam = betu = plusz_minusz = 0;
+				}
 			}
 		}
 		// A többi fajta mezőt nem szükséges ellenőrizni
@@ -505,15 +522,15 @@ void debug_targylista(targyak *elso) {
 
 /*
 kell még:
-tárgyellenőrzés //Pipa
-tárgy hozzáadás //Pipa
+
 aktuális pozíció lementése egy txt-be, amit később onnan lehet tovább folytatni
 op1 és op2 szövegének kiíárása, attól függ mit választott, ahhoz írja ki a szöveget //Pipa - PAUSE van használva arra, hogy a szöveget legyen idő elolvasni. Lehet így nem jó
-kilépés: 1. vissza mész az elejére 2.kilépés.. és kilép az egész programból
-CSV rendes átírása, hogy értelmes legyen //Pipa 
 
 
 volt- ha egy adott pályán már voltál már nem adhat tárgyat   ,majd kiírja, hogy itt már jártál, nem kaphatsz megint ilyen tárgyat
-leellenőrizni a tárgy formátumát
-memóriafoglalás sikerült-e
+leellenőrizni a tárgy formátumát--most csináljuk
+
+
+parancssori paraméter, hogy CSV vagy MENTÉS, csinálunk egy SAVE fájlt
+mentéshez vissza kell állítani a játék elejét
 */
