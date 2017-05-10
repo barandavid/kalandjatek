@@ -4,7 +4,7 @@
 #include <Windows.h>
 
 #define MAX 1000
-#define DEBUG 2				//arra való, hogyha ez 1-esre állítjuk tudunk vele kiíratni kívánt elemeket
+#define DEBUG 3				//arra való, hogyha ez 1-esre állítjuk tudunk vele kiíratni kívánt elemeket
 
 
 typedef struct list {			//lista, ahova beolvasom majd a dolgokat
@@ -57,11 +57,12 @@ void szetszed(char s[], struct list *akt);
 int ellenoriz(char s[]);
 void kiir(lista * elso, int szam);
 int opvalasztas();
-int jatek(lista *elso);
+int jatek(lista *elso, targyak *telso, int aktsorsz);
 int sorszamell(struct lista *elso);
 int targyell(targyak *elso, char  string[]);
 int targyhozzaad(targyak  *elso, char s[], int voltmar);
 void debug_targylista(targyak *elso);
+FILE* fajlmegnyit(char argv[], int* mentes);
 
 int getline(char s[], int n) {
 	int c, i;
@@ -71,23 +72,34 @@ int getline(char s[], int n) {
 	return i;
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+	targyak *mut = NULL;		//targyak lista elso eleme
 	FILE *fp;				//filepointer
 	char st[MAX];			//string, ahova lementem a dolgokat a csv-ből
 	lista *elso = NULL, *akt = NULL, *temp = NULL;
+	int mentes = 0;
 
 
 	system("chcp 1250");			//ékezetes betűket is ki tudjunk írni
 	system("cls");					//letörli a felületet
 
-	fp = fopen("jatek.csv", "r");			//olvasásra nyitjuk meg a CSV-t
+									//kotelezo 1 parameter (CSV vagy SAVE fajl)
+	if (argc != 2) {
+		printf("Hianyzik a parancssori parameter!\n");
+		return 0;
+	}
 
+	//fp = fopen("jatek.csv", "r");			//olvasásra nyitjuk meg a CSV-t
+	fp = fajlmegnyit(argv[1], &mentes);
 	if (fp == NULL) {
 		printf("Hiba a fajl megnyitasakor! \n");
 		return 0;
 	}
 
+	//itt mar tudjuk, hogy sima jatekfajl vagy mentes az, amit kaptunk (*mentes valtozo)
 
+	if (mentes == 0)	//sima jatekfajl betoltese
+	{
 	while (!feof(fp)) {
 		fgets(st, MAX, fp);				//soronként beolvas
 		if (ellenoriz(st) == 0) {
@@ -109,7 +121,7 @@ int main() {
 		if (elso == NULL) elso = akt;
 		else temp->kov = akt;
 		akt->kov = NULL;
-		akt->volt = 0;	//kezdeten nem voltunk meg ezen a palyan
+			akt->volt = 0;	//kezdbeten nem voltunk meg ezen a palyan
 		szetszed(st, akt);
 		temp = akt;
 	}
@@ -139,7 +151,59 @@ int main() {
 		}
 	}
 	//kiir(elso, 4);
-	if (!jatek(elso)) return 0;
+		if (!jatek(elso,mut,elso->sorszam)) return 0;
+	}
+	else {		//mentes betoltese
+
+		//TODO
+		/*
+		- mentes fajl ellenorzo fv
+		- mentes fajlban talalhato csv ellenorzese, betoltese (ellenoriz fv, fenti listakeszito ciklus, sorszamell fv)
+		- mentes fajlban talalhato aktsorszam valtozo visszaallitasa
+		- mentes fajlban talalhato targyak visszaallitasa
+		- mentes fajlban talalhato volt ertekek visszaallitasa
+		*/
+
+		printf("mentes placeholder\n");
+		return 0;
+	}
+}
+
+int mentesell(char sor[]) {
+	//ellenoriz fv mintajara
+	//mappaban a minta, hogy hogyan vannak felosztva az egyes reszek
+	return 1;
+}
+FILE* fajlmegnyit(char argv[], int* mentes) {
+	FILE *fp = NULL;
+	int i,j;
+	char s[MAX];
+
+	i = 0;
+	while (argv[i] != '.' && argv != '\0') i++;
+	if (argv[i] == '\0') return fp;	//nem volt pont a fajlnevben, nincs kiterjesztes -> hibas fajl
+
+	i++;
+	j = 0;
+	while (argv[i] != '\0') {	//fajlkiterjesztes kinyerese
+		s[j] = argv[i];
+		i++;
+		j++;
+	}
+	s[j] = '\0';
+
+	if (!strcmp(s, "csv"))	*mentes = 0;	//ha .csv, akkor sima fajl
+	else if (!strcmp(s, "save")) *mentes = 1;	//ha .save, akkor mentes fajl
+	else return fp;
+
+	fp = fopen(argv, "r");
+
+	if (DEBUG == 3) {
+		printf("FAJLMEGNYITAS: fp addr: %i, mentes: %d\n", fp, *mentes);
+		system("pause");
+	}
+
+	return fp;
 }
 
 void szetszed(char s[], struct list *akt) {		//szétszedi a stringbe fájlból beolvasott dolgokat láncolt listába
@@ -425,13 +489,12 @@ int targyhozzaad(targyak  *elso, char s[], int voltmar) {
 	
 }
 
-int jatek(lista *elso) {				//játék függvény
-	targyak *mut = NULL;		//targyak lista elso eleme
+int jatek(lista *elso, targyak *mut, int aktsorsz) {				//játék függvény (palya elso eleme, targyak elso eleme, aktsorszam)
 	lista *akt;
 	int aktsorszam = 1;
 	int op;
 
-	mut = calloc(1, sizeof(targyak));
+	if(mut==NULL) mut = calloc(1, sizeof(targyak));		//ha nincs meg targy, letrehozun kegy ures dummy targyat
 	mut->kov = NULL;
 	do {
 		system("cls");				//felület letörlése
@@ -459,14 +522,14 @@ int jatek(lista *elso) {				//játék függvény
 						aktsorszam = akt->hova_op1;
 					}
 					else {
-						printf("%s\n", akt->mi_tort_op1);
+					printf("%s\n", akt->mi_tort_op1);
 						_getche();
-						aktsorszam = akt->hova_op1;   //ha 1-est választjuk oda ugrik ahova az egyes opció után kell
+					aktsorszam = akt->hova_op1;   //ha 1-est választjuk oda ugrik ahova az egyes opció után kell
 
 
-						  //miutan kikerestuk a palyat, beallitjuk a 'volt' valtozot
-						akt->volt = 1;
-					}
+					  //miutan kikerestuk a palyat, beallitjuk a 'volt' valtozot
+					akt->volt = 1;
+				}
 				}
 				else {
 					//gaz volt a targy hozzaadasanal
@@ -478,14 +541,14 @@ int jatek(lista *elso) {				//játék függvény
 						printf("%s\n", akt->hova_op1_voltmar);
 					}
 					else {
-						printf("%s\n", akt->mi_tort_op1);
-						system("pause");
-						aktsorszam = akt->hova_op1;
+					printf("%s\n", akt->mi_tort_op1);
+					system("pause");
+					aktsorszam = akt->hova_op1;
 
-						//miutan kikerestuk a palyat, beallitjuk a 'volt' valtozot
-						akt->volt = 1;
-					}
+					//miutan kikerestuk a palyat, beallitjuk a 'volt' valtozot
+					akt->volt = 1;
 				}
+			}
 			}
 			else {		//ha van a tovabblepesnek feltetele
 				if (targyell(mut, akt->szuks_targy)) {				//ha megvan a szukseges targy es a kello darabszam
@@ -507,12 +570,12 @@ int jatek(lista *elso) {				//játék függvény
 						printf("%s\n", akt->hova_op1_voltmar);
 					}
 					else {
-						printf("%s\n", akt->mi_tort_op1);
+					printf("%s\n", akt->mi_tort_op1);
 						_getche();
-						aktsorszam = akt->hova_op1;		//ha 1-est választjuk oda ugrik ahova az egyes opció után kell
-
-						//miutan kikerestuk a palyat, beallitjuk a 'volt' valtozot
-						akt->volt = 1;
+					aktsorszam = akt->hova_op1;		//ha 1-est választjuk oda ugrik ahova az egyes opció után kell
+					
+					//miutan kikerestuk a palyat, beallitjuk a 'volt' valtozot
+					akt->volt = 1;
 					}
 					
 				}
