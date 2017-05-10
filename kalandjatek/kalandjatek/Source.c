@@ -4,7 +4,7 @@
 #include <Windows.h>
 
 #define MAX 1000
-#define DEBUG 3				//arra való, hogyha ez 1-esre állítjuk tudunk vele kiíratni kívánt elemeket
+#define DEBUG 2				//0: kikapcsolva, 1: listak, 2: targyak, 3: fajlok
 
 
 typedef struct list {			//lista, ahova beolvasom majd a dolgokat
@@ -30,29 +30,6 @@ typedef struct targy {				//tárgyak listája
 	struct targyak *kov;
 }targyak;
 
-
-int ekezet(char c) {
-	//egy karakter ellenorzese, hogy ekezetes karakter-e
-	//kis es nagybetus ekezetek
-	char s[18] = { 'á', 'Á', 'é', 'É', 'í', 'Í', 'ó', 'Ó', 'ü', 'Ü', 'ű', 'Ű', 'ö', 'Ö', 'ő', 'Ő', 'ú', 'Ú' };
-	int i, van = 0;
-
-	for (i = 0; i < 18 && van == 0; i++) {
-		if (c == s[i]) van = 1;
-	}
-	if (van) return 1;
-	return 0;
-}
-int magyarbetu(char c) {
-	//egy karakter ellenorzese hogy a magyar ABC-ben benn van-e
-	//kis es nagybetuk egyarant, ekezetekkel
-	if ((c >= 'a'&&c <= 'z') || (c >= 'A' && c <= 'Z') || ekezet(c)) return 1;
-	return 0;
-}
-
-
-
-
 void szetszed(char s[], struct list *akt);
 int ellenoriz(char s[]);
 void kiir(lista * elso, int szam);
@@ -63,6 +40,8 @@ int targyell(targyak *elso, char  string[]);
 int targyhozzaad(targyak  *elso, char s[], int voltmar);
 void debug_targylista(targyak *elso);
 FILE* fajlmegnyit(char argv[], int* mentes);
+int ekezet(char c);
+int magyarbetu(char c);
 
 int getline(char s[], int n) {
 	int c, i;
@@ -100,65 +79,65 @@ int main(int argc, char* argv[]) {
 
 	if (mentes == 0)	//sima jatekfajl betoltese
 	{
-	while (!feof(fp)) {
-		fgets(st, MAX, fp);				//soronként beolvas
-		if (ellenoriz(st) == 0) {
-			printf("Rossz volt a csv formátuma \n");
+		while (!feof(fp)) {
+			fgets(st, MAX, fp);				//soronként beolvas
+			if (ellenoriz(st) == 0) {
+				printf("Rossz volt a csv formátuma \n");
+				return 0;
+			}
+		}
+
+		rewind(fp);						//fájlmutatót az elejére állítja
+
+		while (!feof(fp)) {
+			fgets(st, MAX, fp);			//beolvasom soronként 
+
+			akt = calloc(1, sizeof(lista));			//memóriafoglalás
+			if (akt == NULL) {
+				printf("Nem siekrult a memoriafoglalas!\n");
+				return 0;
+			}
+			if (elso == NULL) elso = akt;
+			else temp->kov = akt;
+			akt->kov = NULL;
+				akt->volt = 0;	//kezdbeten nem voltunk meg ezen a palyan
+			szetszed(st, akt);
+			temp = akt;
+		}
+
+		//ide kell majd a sorszamell
+		if (!sorszamell(elso)) {
+			printf("Hibas sorszam!\n");
 			return 0;
 		}
-	}
-
-	rewind(fp);						//fájlmutatót az elejére állítja
-
-	while (!feof(fp)) {
-		fgets(st, MAX, fp);			//beolvasom soronként 
-
-		akt = calloc(1, sizeof(lista));			//memóriafoglalás
-		if (akt == NULL) {
-			printf("Nem siekrult a memoriafoglalas!\n");
-			return 0;
+		if (DEBUG == 1) {
+			akt = elso;							//lista bejárás
+			while (akt != NULL) {
+				printf("DEBUG: sorszam: %d\n", akt->sorszam);
+				printf("DEBUG: helyszin: %s\n", akt->helyszin);
+				printf("DEBUG: leiras: %s\n", akt->leiras);
+				printf("DEBUG: op1 leiras: %s\n", akt->op1_leiras);
+				printf("DEBUG: op2 leiras: %s\n", akt->op2_leiras);
+				printf("DEBUG: szukseges targy 1: %s\n", akt->szuks_targy);
+				printf("DEBUG: plusz/minusz targy op1: %s\n", akt->plusz_minusz_targy);
+				printf("DEBUG: hova op1: %d\n", akt->hova_op1);
+				printf("DEBUG: hova op2: %d\n", akt->hova_op2);
+				printf("DEBUG: mi tortenik op1: %s\n", akt->mi_tort_op1);
+				printf("DEBUG: mi tortenik op2: %s\n", akt->mi_tort_op2);
+				printf("DEBUG: mi tortenik op2: %s\n", akt->hova_op1_voltmar);
+				printf("----------------------------uj sor---------------------\n");
+				akt = akt->kov;
+			}
 		}
-		if (elso == NULL) elso = akt;
-		else temp->kov = akt;
-		akt->kov = NULL;
-			akt->volt = 0;	//kezdbeten nem voltunk meg ezen a palyan
-		szetszed(st, akt);
-		temp = akt;
-	}
-
-	//ide kell majd a sorszamell
-	if (!sorszamell(elso)) {
-		printf("Hibas sorszam!\n");
-		return 0;
-	}
-	if (DEBUG == 1) {
-		akt = elso;							//lista bejárás
-		while (akt != NULL) {
-			printf("sorszam: %d\n", akt->sorszam);
-			printf("helyszin: %s\n", akt->helyszin);
-			printf("leiras: %s\n", akt->leiras);
-			printf("op1 leiras: %s\n", akt->op1_leiras);
-			printf("op2 leiras: %s\n", akt->op2_leiras);
-			printf("szukseges targy 1: %s\n", akt->szuks_targy);
-			printf("plusz/minusz targy op1: %s\n", akt->plusz_minusz_targy);
-			printf("hova op1: %d\n", akt->hova_op1);
-			printf("hova op2: %d\n", akt->hova_op2);
-			printf("mi tortenik op1: %s\n", akt->mi_tort_op1);
-			printf("mi tortenik op2: %s\n", akt->mi_tort_op2);
-			printf("mi tortenik op2: %s\n", akt->hova_op1_voltmar);
-			printf("----------------------------uj sor---------------------\n");
-			akt = akt->kov;
-		}
-	}
-	//kiir(elso, 4);
-		if (!jatek(elso,mut,elso->sorszam)) return 0;
+		//kiir(elso, 4);
+			if (!jatek(elso,mut,elso->sorszam)) return 0;
 	}
 	else {		//mentes betoltese
 
 		//TODO
 		/*
-		- mentes fajl ellenorzo fv
-		- mentes fajlban talalhato csv ellenorzese, betoltese (ellenoriz fv, fenti listakeszito ciklus, sorszamell fv)
+		- mentes fajl ellenorzo fv, a fajl ellenorzese
+		- mentes fajlban talalhato csv betoltese (ellenoriz fv, fenti listakeszito ciklus, sorszamell fv)
 		- mentes fajlban talalhato aktsorszam valtozo visszaallitasa
 		- mentes fajlban talalhato targyak visszaallitasa
 		- mentes fajlban talalhato volt ertekek visszaallitasa
@@ -253,7 +232,7 @@ FILE* fajlmegnyit(char argv[], int* mentes) {
 	fp = fopen(argv, "r");
 
 	if (DEBUG == 3) {
-		printf("FAJLMEGNYITAS: fp addr: %i, mentes: %d\n", fp, *mentes);
+		printf("DEBUG: FAJLMEGNYITAS: fp addr: %i, mentes: %d\n", fp, *mentes);
 		system("pause");
 	}
 
@@ -321,7 +300,7 @@ int ellenoriz(char s[]) { //leellenőrzi, hogy az adott helyen megfelelő karakt
 			j++;
 		}
 		string[j] = '\0';								//lezárja a stringet ha eléri a ;-t vagy sorvéget
-		if (DEBUG == 1) printf("%s\n", string);
+		if (DEBUG == 1) printf("DEBUG: %s\n", string);
 
 		if (k == 0 || k == 7 || k == 8) {  //sorszám mező, tovább ugrások mezők helyességének ellenőrzése
 			for (c = 0; string[c] != '\0'; c++) {
@@ -370,14 +349,14 @@ int sorszamell(struct lista *elso) {		//átrakja a sorszámokat egy ,,sorszamok,
 			akt2 = elso;
 			while (akt2 != NULL && (akt2->sorszam != akt1->hova_op1)) akt2 = akt2->kov; //amíg nincs vege a listanak ES nem talaltunk ilyen sorszamot
 			if (akt2 == NULL) {
-				if (DEBUG == 1) printf("op1 %d\n", akt1->sorszam); //csak azért kell, ha hibát keresünk
+				if (DEBUG == 1) printf("DEBUG: op1 %d\n", akt1->sorszam); //csak azért kell, ha hibát keresünk
 				return 0; //az op1_hova nem volt talalhato a palya sorszamok kozott
 			}
 
 			akt2 = elso;
 			while (akt2 != NULL && (akt2->sorszam != akt1->hova_op2)) akt2 = akt2->kov; //ameg nincs vege a listanak ES nem talaltunk ilyen sorszamot
 			if (akt2 == NULL) {
-				if (DEBUG == 1) printf("op2 %d\n", akt1->sorszam); //csak azért kell, ha hibát keresünk
+				if (DEBUG == 1) printf("DEBUG: op2 %d\n", akt1->sorszam); //csak azért kell, ha hibát keresünk
 				return 0; //az op2_hova nem volt talalhato a palya sorszamok kozott
 			}
 		}
@@ -428,7 +407,6 @@ int targyell(targyak *elso, char  string[]) {		//leellenőrzi, hogy benne van-e 
 			szam[j] = string[i];
 			j++;
 		}
-		
 	}
 	szam[j] = '\0';
 	i = 0;
@@ -438,7 +416,6 @@ int targyell(targyak *elso, char  string[]) {		//leellenőrzi, hogy benne van-e 
 			targy[j] = string[i];
 			j++;
 		}
-		
 	}
 	targy[j] = '\0';
 
@@ -533,7 +510,9 @@ int targyhozzaad(targyak  *elso, char s[], int voltmar) {
 		i++;	//a kovetkezo resz kezdese (vagy a \0)
 
 		if (DEBUG == 2) {
-			printf("TARGY HOZZAADVA: %s %s db\n", targy, szam);
+			printf("DEBUG: TARGY ");
+		if (plusz) printf("HOZZAADVA: %s %s db\n", targy, szam);
+		else printf("LEVONVA: %s %s db\n", targy, szam);
 			system("pause");
 		}
 
@@ -564,7 +543,7 @@ int jatek(lista *elso, targyak *mut, int aktsorsz) {				//játék függvény (pa
 			{
 
 				if (DEBUG == 2) {
-					printf("nincs a tovabblepesnek feltetele\n");
+					printf("DEBUG: nincs a tovabblepesnek feltetele\n");
 					system("pause");
 				}
 
@@ -588,7 +567,7 @@ int jatek(lista *elso, targyak *mut, int aktsorsz) {				//játék függvény (pa
 				else {
 					//gaz volt a targy hozzaadasanal
 					if (DEBUG == 2) {
-						printf("gaz volt a targy hozzaadasanal\n");
+						printf("DEBUG: baj volt a targy hozzaadasanal\n");
 						system("pause");
 					}
 					if (akt->volt == 1) {
@@ -611,13 +590,13 @@ int jatek(lista *elso, targyak *mut, int aktsorsz) {				//játék függvény (pa
 					
 					if (!targyhozzaad(mut, akt->plusz_minusz_targy, akt->volt)) {
 						if (DEBUG == 2) {
-							printf("para volt a targyhozzaadasnal\n");
+							printf("DEBUG: baj volt a targyhozzaadasnal\n");
 							system("pause");
 						}
 
 					}
 					if (DEBUG == 2) {
-						printf("van a tovabblepesnek feltetele, es teljesult\n");
+						printf("DEBUG: van a tovabblepesnek feltetele, es teljesult\n");
 						debug_targylista(mut);
 						system("pause");
 					}
@@ -637,9 +616,9 @@ int jatek(lista *elso, targyak *mut, int aktsorsz) {				//játék függvény (pa
 					}
 					
 				}
-				else {			// ha nincs meg a kello targy vagy nincs annyi db belole
+				else {			//ha nincs meg a kello targy vagy nincs annyi db belole
 					if (DEBUG == 2) {
-						printf("van a tovabblepesnek feltetele, de nem teljesult\n");
+						printf("DEBUG: van a tovabblepesnek feltetele, de nem teljesult\n");
 						debug_targylista(mut);
 						system("pause");
 					}
@@ -650,7 +629,7 @@ int jatek(lista *elso, targyak *mut, int aktsorsz) {				//játék függvény (pa
 					_getche();
 					aktsorszam = akt->hova_op2;
 					if (DEBUG == 2) {
-						printf("Nincs ilyen targy, vagy nincs ennyi db.");
+						printf("DEBUG: nincs ilyen targy, vagy nincs ennyi db belőle");
 						system("pause");
 					}
 				}
@@ -676,12 +655,32 @@ void debug_targylista(targyak *elso) {
 	targyak *akt;
 
 	akt = elso;
-	printf("TARGYLISTA: ");
+	printf("DEBUG: TARGYLISTA: ");
 	while (akt != NULL) {
 		printf("%s %d db, ", akt->nev, akt->drb);
 		akt = akt->kov;
 	}
 }
+
+int ekezet(char c) {
+	//egy karakter ellenorzese, hogy ekezetes karakter-e
+	//kis es nagybetus ekezetek
+	char s[18] = { 'á', 'Á', 'é', 'É', 'í', 'Í', 'ó', 'Ó', 'ü', 'Ü', 'ű', 'Ű', 'ö', 'Ö', 'ő', 'Ő', 'ú', 'Ú' };
+	int i, van = 0;
+
+	for (i = 0; i < 18 && van == 0; i++) {
+		if (c == s[i]) van = 1;
+	}
+	if (van) return 1;
+	return 0;
+}
+int magyarbetu(char c) {
+	//egy karakter ellenorzese hogy a magyar ABC-ben benn van-e
+	//kis es nagybetuk egyarant, ekezetekkel
+	if ((c >= 'a'&&c <= 'z') || (c >= 'A' && c <= 'Z') || ekezet(c)) return 1;
+	return 0;
+}
+
 
 /*
 kell még:
