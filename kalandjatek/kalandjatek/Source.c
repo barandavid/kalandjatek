@@ -172,6 +172,60 @@ int main(int argc, char* argv[]) {
 int mentesell(char sor[]) {
 	//ellenoriz fv mintajara
 	//mappaban a minta, hogy hogyan vannak felosztva az egyes reszek
+
+	int i=0,j=0,k=0,c;
+	char string[MAX];
+	int szam = 0, betu = 0,x=0;
+
+	do {
+		j = 0;
+		for (; sor[i] != ';' && sor[i] != '\0'; i++) {
+			string[j] = sor[i];
+			j++;
+		}
+		string[j] = '\0';
+
+		if (k == 0) {
+			for (c = 0; string[c] != '\0'; c++) {
+				if ((string[c] < 'a' || string[c] > 'z') && string[c] != '.')return 0;
+				if (string[0] == '.')return 0;
+				//azt is le kell, hogy '.'-al végződik-e?
+			}
+		}
+		if (k == 1) { 
+			//asnio
+			for (c = 0; string[c] != '\0'; c++) {
+				if (string[c] <'0' || string[c]>'9')return 0;
+			}
+		}
+		if (k == 2) {
+			//pl.: 3arany1kulcs
+			for (c = 0; string[c] != '\0'; c++) {
+				if (string[c] >= '0' && string[c] <= '9') {
+					szam++;
+					if (betu != 0) return 0;
+				}
+				else if (string[c] >= 'a' && string[c] <= 'z') {
+					betu++;
+					if (szam == 0) return 0;
+					szam = betu = 0;
+				}
+			}
+		}
+		
+		if (k = 3) {
+			x = strlen(string);
+			for (c = 0; string[c] != '\0'; c++) {
+				if ((string[c] <'0' || string[c]>'9') && string[c] != ',')return 0;
+				if (string[0] == ',')return 0;
+				if (string[x - 1] < 0 || string[x - 1] > 9) return 0;
+			}
+		}
+				
+		k++;
+		i++;
+	} while (sor[i] != '\0');
+
 	return 1;
 }
 FILE* fajlmegnyit(char argv[], int* mentes) {
@@ -523,7 +577,7 @@ int jatek(lista *elso, targyak *mut, int aktsorsz) {				//játék függvény (pa
 					}
 					else {
 					printf("%s\n", akt->mi_tort_op1);
-						_getche();
+					_getche();
 					aktsorszam = akt->hova_op1;   //ha 1-est választjuk oda ugrik ahova az egyes opció után kell
 
 
@@ -539,6 +593,8 @@ int jatek(lista *elso, targyak *mut, int aktsorsz) {				//játék függvény (pa
 					}
 					if (akt->volt == 1) {
 						printf("%s\n", akt->hova_op1_voltmar);
+						_getche();
+						aktsorszam = akt->hova_op1;
 					}
 					else {
 					printf("%s\n", akt->mi_tort_op1);
@@ -568,6 +624,8 @@ int jatek(lista *elso, targyak *mut, int aktsorsz) {				//játék függvény (pa
 
 					if (akt->volt == 1) {
 						printf("%s\n", akt->hova_op1_voltmar);
+						_getche();
+						aktsorszam = akt->hova_op1;
 					}
 					else {
 					printf("%s\n", akt->mi_tort_op1);
@@ -629,12 +687,11 @@ void debug_targylista(targyak *elso) {
 kell még:
 Dávid:
 
-- hova_op1_voltmar: ha voltunk mar valahol, nem kapunk targyat, ehhez kell egy uj mezo a csv-ben
+mentés ellenőrzés
 
 Martin:
 
-- parancssori paraméter, hogy CSV vagy MENTÉS, csinálunk egy SAVE fájlt
-
 - mentés
+-betöltés
 
 */
