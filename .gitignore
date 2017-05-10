@@ -35,3 +35,12 @@
 #.vc.opend es .vc.db bug javitasa
 *.VC.opendb
 *.VC.db
+
+# User defined
+*.tlog
+*.log
+*.ilk
+*.pdb
+*.iobj
+*.ipdb
+*.filters
