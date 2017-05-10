@@ -19,6 +19,7 @@ typedef struct list {			//lista, ahova beolvasom majd a dolgokat
 	int hova_op2;
 	char mi_tort_op1[MAX];
 	char mi_tort_op2[MAX];
+	char hova_op1_voltmar[MAX];
 	struct lista *kov;
 	int volt;	//voltunk-e mar az adott palyan (ha igen, nem adunk targyat)
 }lista;
@@ -132,6 +133,7 @@ int main() {
 			printf("hova op2: %d\n", akt->hova_op2);
 			printf("mi tortenik op1: %s\n", akt->mi_tort_op1);
 			printf("mi tortenik op2: %s\n", akt->mi_tort_op2);
+			printf("mi tortenik op2: %s\n", akt->hova_op1_voltmar);
 			printf("----------------------------uj sor---------------------\n");
 			akt = akt->kov;
 		}
@@ -175,6 +177,8 @@ void szetszed(char s[], struct list *akt) {		//szétszedi a stringbe fájlból b
 			strcpy(akt->mi_tort_op1, string);
 		case 10:
 			strcpy(akt->mi_tort_op2, string);
+		case 11:
+			strcpy(akt->hova_op1_voltmar, string);
 		}
 		k++;
 		i++;			//átléptetjük a ;-n, azért kell ide az i++
@@ -448,13 +452,21 @@ int jatek(lista *elso) {				//játék függvény
 				}
 
 				if (targyhozzaad(mut, akt->plusz_minusz_targy, akt->volt)) {
-					printf("%s\n", akt->mi_tort_op1);
-					system("pause");
-					aktsorszam = akt->hova_op1;   //ha 1-est választjuk oda ugrik ahova az egyes opció után kell
+
+					if (akt->volt == 1) {
+						printf("%s\n", akt->hova_op1_voltmar);
+						_getche();
+						aktsorszam = akt->hova_op1;
+					}
+					else {
+						printf("%s\n", akt->mi_tort_op1);
+						_getche();
+						aktsorszam = akt->hova_op1;   //ha 1-est választjuk oda ugrik ahova az egyes opció után kell
 
 
-					  //miutan kikerestuk a palyat, beallitjuk a 'volt' valtozot
-					akt->volt = 1;
+						  //miutan kikerestuk a palyat, beallitjuk a 'volt' valtozot
+						akt->volt = 1;
+					}
 				}
 				else {
 					//gaz volt a targy hozzaadasanal
@@ -462,12 +474,17 @@ int jatek(lista *elso) {				//játék függvény
 						printf("gaz volt a targy hozzaadasanal\n");
 						system("pause");
 					}
-					printf("%s\n", akt->mi_tort_op1);
-					system("pause");
-					aktsorszam = akt->hova_op1;
+					if (akt->volt == 1) {
+						printf("%s\n", akt->hova_op1_voltmar);
+					}
+					else {
+						printf("%s\n", akt->mi_tort_op1);
+						system("pause");
+						aktsorszam = akt->hova_op1;
 
-					//miutan kikerestuk a palyat, beallitjuk a 'volt' valtozot
-					akt->volt = 1;
+						//miutan kikerestuk a palyat, beallitjuk a 'volt' valtozot
+						akt->volt = 1;
+					}
 				}
 			}
 			else {		//ha van a tovabblepesnek feltetele
@@ -485,12 +502,18 @@ int jatek(lista *elso) {				//játék függvény
 						debug_targylista(mut);
 						system("pause");
 					}
-					printf("%s\n", akt->mi_tort_op1);
-					system("pause");
-					aktsorszam = akt->hova_op1;		//ha 1-est választjuk oda ugrik ahova az egyes opció után kell
-					
-					//miutan kikerestuk a palyat, beallitjuk a 'volt' valtozot
-					akt->volt = 1;
+
+					if (akt->volt == 1) {
+						printf("%s\n", akt->hova_op1_voltmar);
+					}
+					else {
+						printf("%s\n", akt->mi_tort_op1);
+						_getche();
+						aktsorszam = akt->hova_op1;		//ha 1-est választjuk oda ugrik ahova az egyes opció után kell
+
+						//miutan kikerestuk a palyat, beallitjuk a 'volt' valtozot
+						akt->volt = 1;
+					}
 					
 				}
 				else {			// ha nincs meg a kello targy vagy nincs annyi db belole
@@ -499,9 +522,11 @@ int jatek(lista *elso) {				//játék függvény
 						debug_targylista(mut);
 						system("pause");
 					}
+
+
 					printf("Ehhez az opcióhoz %c %s szükséges! A másik lehetőséget választod.\n", akt->szuks_targy[0] , akt->szuks_targy+1); //ha kell valamilyen tárgy akkor figyelmeztet rá	//EZ ITT NEM LESZ JO PETI (10 vagy tobb targy utan)
 					printf("%s\n", akt->mi_tort_op2);
-					system("pause");
+					_getche();
 					aktsorszam = akt->hova_op2;
 					if (DEBUG == 2) {
 						printf("Nincs ilyen targy, vagy nincs ennyi db.");
@@ -512,7 +537,7 @@ int jatek(lista *elso) {				//játék függvény
 		}
 		else if (op == 2) {
 			printf("%s\n", akt->mi_tort_op2);
-			system("pause");
+			_getche();
 			aktsorszam = akt->hova_op2;  //ha 2-esz választjuk ida ugrik ahova a kettes opció után kell
 		}
 		else return -1; //KILEPES
@@ -542,8 +567,6 @@ kell még:
 Dávid:
 
 - hova_op1_voltmar: ha voltunk mar valahol, nem kapunk targyat, ehhez kell egy uj mezo a csv-ben
-
-- op1 és op2 szövegének kiíárása, attól függ mit választott, ahhoz írja ki a szöveget //Pipa - PAUSE van használva arra, hogy a szöveget legyen idő elolvasni. Lehet így nem jó (MEGOLDÁS: _getche, ez 1 karaktert vár csak meg és azonnal továbbmegy)
 
 Martin:
 
