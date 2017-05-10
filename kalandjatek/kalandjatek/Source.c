@@ -4,7 +4,7 @@
 #include <Windows.h>
 
 #define MAX 1000
-#define DEBUG 2				//arra való, hogyha ez 1-esre állítjuk tudunk vele kiíratni kívánt elemeket
+#define DEBUG 3				//arra való, hogyha ez 1-esre állítjuk tudunk vele kiíratni kívánt elemeket
 
 
 typedef struct list {			//lista, ahova beolvasom majd a dolgokat
@@ -56,11 +56,12 @@ void szetszed(char s[], struct list *akt);
 int ellenoriz(char s[]);
 void kiir(lista * elso, int szam);
 int opvalasztas();
-int jatek(lista *elso);
+int jatek(lista *elso, targyak *telso, int aktsorsz);
 int sorszamell(struct lista *elso);
 int targyell(targyak *elso, char  string[]);
 int targyhozzaad(targyak  *elso, char s[], int voltmar);
 void debug_targylista(targyak *elso);
+FILE* fajlmegnyit(char argv[], int* mentes);
 
 int getline(char s[], int n) {
 	int c, i;
@@ -70,74 +71,137 @@ int getline(char s[], int n) {
 	return i;
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+	targyak *mut = NULL;		//targyak lista elso eleme
 	FILE *fp;				//filepointer
 	char st[MAX];			//string, ahova lementem a dolgokat a csv-ből
 	lista *elso = NULL, *akt = NULL, *temp = NULL;
+	int mentes = 0;
 
 
 	system("chcp 1250");			//ékezetes betűket is ki tudjunk írni
 	system("cls");					//letörli a felületet
 
-	fp = fopen("jatek.csv", "r");			//olvasásra nyitjuk meg a CSV-t
+									//kotelezo 1 parameter (CSV vagy SAVE fajl)
+	if (argc != 2) {
+		printf("Hianyzik a parancssori parameter!\n");
+		return 0;
+	}
 
+	//fp = fopen("jatek.csv", "r");			//olvasásra nyitjuk meg a CSV-t
+	fp = fajlmegnyit(argv[1], &mentes);
 	if (fp == NULL) {
 		printf("Hiba a fajl megnyitasakor! \n");
 		return 0;
 	}
 
+	//itt mar tudjuk, hogy sima jatekfajl vagy mentes az, amit kaptunk (*mentes valtozo)
 
-	while (!feof(fp)) {
-		fgets(st, MAX, fp);				//soronként beolvas
-		if (ellenoriz(st) == 0) {
-			printf("Rossz volt a csv formátuma \n");
+	if (mentes == 0)	//sima jatekfajl betoltese
+	{
+		while (!feof(fp)) {
+			fgets(st, MAX, fp);				//soronként beolvas
+			if (ellenoriz(st) == 0) {
+				printf("Rossz volt a csv formátuma \n");
+				return 0;
+			}
+		}
+
+		rewind(fp);						//fájlmutatót az elejére állítja
+
+		while (!feof(fp)) {
+			fgets(st, MAX, fp);			//beolvasom soronként 
+
+			akt = calloc(1, sizeof(lista));			//memóriafoglalás
+			if (akt == NULL) {
+				printf("Nem siekrult a memoriafoglalas!\n");
+				return 0;
+			}
+			if (elso == NULL) elso = akt;
+			else temp->kov = akt;
+			akt->kov = NULL;
+			akt->volt = 0;	//kezdbeten nem voltunk meg ezen a palyan
+			szetszed(st, akt);
+			temp = akt;
+		}
+
+		//ide kell majd a sorszamell
+		if (!sorszamell(elso)) {
+			printf("Hibas sorszam!\n");
 			return 0;
 		}
-	}
-
-	rewind(fp);						//fájlmutatót az elejére állítja
-
-	while (!feof(fp)) {
-		fgets(st, MAX, fp);			//beolvasom soronként 
-
-		akt = calloc(1, sizeof(lista));			//memóriafoglalás
-		if (akt == NULL) {
-			printf("Nem siekrult a memoriafoglalas!\n");
-			return 0;
+		if (DEBUG == 1) {
+			akt = elso;							//lista bejárás
+			while (akt != NULL) {
+				printf("sorszam: %d\n", akt->sorszam);
+				printf("helyszin: %s\n", akt->helyszin);
+				printf("leiras: %s\n", akt->leiras);
+				printf("op1 leiras: %s\n", akt->op1_leiras);
+				printf("op2 leiras: %s\n", akt->op2_leiras);
+				printf("szukseges targy 1: %s\n", akt->szuks_targy);
+				printf("plusz/minusz targy op1: %s\n", akt->plusz_minusz_targy);
+				printf("hova op1: %d\n", akt->hova_op1);
+				printf("hova op2: %d\n", akt->hova_op2);
+				printf("mi tortenik op1: %s\n", akt->mi_tort_op1);
+				printf("mi tortenik op2: %s\n", akt->mi_tort_op2);
+				printf("----------------------------uj sor---------------------\n");
+				akt = akt->kov;
+			}
 		}
-		if (elso == NULL) elso = akt;
-		else temp->kov = akt;
-		akt->kov = NULL;
-		akt->volt = 0;	//kezdeten nem voltunk meg ezen a palyan
-		szetszed(st, akt);
-		temp = akt;
+		//kiir(elso, 4);
+		if (!jatek(elso,mut,elso->sorszam)) return 0;
 	}
+	else {		//mentes betoltese
 
-	//ide kell majd a sorszamell
-	if (!sorszamell(elso)) {
-		printf("Hibas sorszam!\n");
+		//TODO
+		/*
+		- mentes fajl ellenorzo fv
+		- mentes fajlban talalhato csv ellenorzese, betoltese (ellenoriz fv, fenti listakeszito ciklus, sorszamell fv)
+		- mentes fajlban talalhato aktsorszam valtozo visszaallitasa
+		- mentes fajlban talalhato targyak visszaallitasa
+		- mentes fajlban talalhato volt ertekek visszaallitasa
+		*/
+
+		printf("mentes placeholder\n");
 		return 0;
 	}
-	if (DEBUG == 1) {
-		akt = elso;							//lista bejárás
-		while (akt != NULL) {
-			printf("sorszam: %d\n", akt->sorszam);
-			printf("helyszin: %s\n", akt->helyszin);
-			printf("leiras: %s\n", akt->leiras);
-			printf("op1 leiras: %s\n", akt->op1_leiras);
-			printf("op2 leiras: %s\n", akt->op2_leiras);
-			printf("szukseges targy 1: %s\n", akt->szuks_targy);
-			printf("plusz/minusz targy op1: %s\n", akt->plusz_minusz_targy);
-			printf("hova op1: %d\n", akt->hova_op1);
-			printf("hova op2: %d\n", akt->hova_op2);
-			printf("mi tortenik op1: %s\n", akt->mi_tort_op1);
-			printf("mi tortenik op2: %s\n", akt->mi_tort_op2);
-			printf("----------------------------uj sor---------------------\n");
-			akt = akt->kov;
-		}
+}
+
+int mentesell(char sor[]) {
+	//ellenoriz fv mintajara
+	//mappaban a minta, hogy hogyan vannak felosztva az egyes reszek
+	return 1;
+}
+FILE* fajlmegnyit(char argv[], int* mentes) {
+	FILE *fp = NULL;
+	int i,j;
+	char s[MAX];
+
+	i = 0;
+	while (argv[i] != '.' && argv != '\0') i++;
+	if (argv[i] == '\0') return fp;	//nem volt pont a fajlnevben, nincs kiterjesztes -> hibas fajl
+
+	i++;
+	j = 0;
+	while (argv[i] != '\0') {	//fajlkiterjesztes kinyerese
+		s[j] = argv[i];
+		i++;
+		j++;
 	}
-	//kiir(elso, 4);
-	if (!jatek(elso)) return 0;
+	s[j] = '\0';
+
+	if (!strcmp(s, "csv"))	*mentes = 0;	//ha .csv, akkor sima fajl
+	else if (!strcmp(s, "save")) *mentes = 1;	//ha .save, akkor mentes fajl
+	else return fp;
+
+	fp = fopen(argv, "r");
+
+	if (DEBUG == 3) {
+		printf("FAJLMEGNYITAS: fp addr: %i, mentes: %d\n", fp, *mentes);
+		system("pause");
+	}
+
+	return fp;
 }
 
 void szetszed(char s[], struct list *akt) {		//szétszedi a stringbe fájlból beolvasott dolgokat láncolt listába
@@ -421,13 +485,12 @@ int targyhozzaad(targyak  *elso, char s[], int voltmar) {
 	
 }
 
-int jatek(lista *elso) {				//játék függvény
-	targyak *mut = NULL;		//targyak lista elso eleme
+int jatek(lista *elso, targyak *mut, int aktsorsz) {				//játék függvény (palya elso eleme, targyak elso eleme, aktsorszam)
 	lista *akt;
 	int aktsorszam = 1;
 	int op;
 
-	mut = calloc(1, sizeof(targyak));
+	if(mut==NULL) mut = calloc(1, sizeof(targyak));		//ha nincs meg targy, letrehozun kegy ures dummy targyat
 	mut->kov = NULL;
 	do {
 		system("cls");				//felület letörlése
