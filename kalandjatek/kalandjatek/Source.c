@@ -244,7 +244,9 @@ int main(int argc, char* argv[]) {
 		- mentes fajlban talalhato targyak visszaallitasa
 		- mentes fajlban talalhato volt ertekek visszaallitasa
 		*/
-
+		printf("DEBUG: mentes targylista: \n");
+		debug_targylista(mut);
+		system("pause");
 		jatek(elso, mut, aktsorszam);
 		printf("mentes placeholder\n");
 		return 0;
@@ -630,8 +632,10 @@ int jatek(lista *elso, targyak *mut, int aktsorsz) {				//játék függvény (pa
 	int aktsorszam = 1;
 	int op;
 
-	if(mut==NULL) mut = calloc(1, sizeof(targyak));		//ha nincs meg targy, letrehozun kegy ures dummy targyat
-	mut->kov = NULL;
+	if (mut == NULL) {
+		mut = calloc(1, sizeof(targyak));		//ha nincs meg targy, letrehozun kegy ures dummy targyat
+		mut->kov = NULL;
+	}
 
 	aktsorszam = aktsorsz;	//mentesbol aktsorszam visszaallitasa
 	do {
