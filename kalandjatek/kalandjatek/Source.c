@@ -4,7 +4,7 @@
 #include <Windows.h>
 
 #define MAX 1000
-#define DEBUG 2				//0: kikapcsolva, 1: listak, 2: targyak, 3: fajlok
+#define DEBUG 4				//0: kikapcsolva, 1: listak, 2: targyak, 3: fajlok
 
 
 typedef struct list {			//lista, ahova beolvasom majd a dolgokat
@@ -53,10 +53,18 @@ int getline(char s[], int n) {
 
 int main(int argc, char* argv[]) {
 	targyak *mut = NULL;		//targyak lista elso eleme
-	FILE *fp;				//filepointer
+	FILE *fp, *fp2;				//filepointer
 	char st[MAX];			//string, ahova lementem a dolgokat a csv-ből
 	lista *elso = NULL, *akt = NULL, *temp = NULL;
 	int mentes = 0;
+	int i;
+	int szam, betu;
+	char string[MAX];
+	char s1[MAX];
+	char s2[MAX];
+	int c, k, j, l, m;
+	int aktsorszam;
+	int targydb;
 
 
 	system("chcp 1250");			//ékezetes betűket is ki tudjunk írni
@@ -139,6 +147,102 @@ int main(int argc, char* argv[]) {
 			printf("Hibas fajl\n");
 			return 0;
 		}
+
+		//ellenoriz fv mintajara
+		//mappaban a minta, hogy hogyan vannak felosztva az egyes reszek
+		rewind(fp);
+		fgets(st, MAX * 1, fp);
+
+		i = 0;
+		k = 0;
+		szam = betu = 0;
+		do {
+			j = 0;
+			for (; st[i] != ';' && st[i] != '\0'; i++) {
+				string[j] = st[i];
+				j++;
+			}
+			string[j] = '\0';
+
+			if (k == 0) {		//CSV neve
+				fp2 = fopen(string, "r");
+				while (!feof(fp2)) {
+					fgets(s1, MAX, fp2);			//beolvasom soronként 
+
+					akt = calloc(1, sizeof(lista));			//memóriafoglalás
+					if (akt == NULL) {
+						printf("Nem siekrult a memoriafoglalas!\n");
+						return 0;
+					}
+					if (elso == NULL) elso = akt;
+					else temp->kov = akt;
+					akt->kov = NULL;
+					akt->volt = 0;	//kezdbeten nem voltunk meg ezen a palyan
+					szetszed(s1, akt);
+					temp = akt;
+				}
+			}
+			else if (k == 1) {		//aktsorszam
+				aktsorszam = atoi(string);
+			}
+			else if (k == 2) {
+				//pl.: 3arany1kulcs
+				l = m = 0;
+				for (c = 0; string[c] != '\0'; c++) {
+					if (string[c] >= '0' && string[c] <= '9') {
+						if (szam != 0 && betu != 0) {		//uj targy kezdodik
+							szam = betu = 0;
+
+							s1[l] = '\0';
+							m = 0;
+							l = 0;
+
+							while (s1[l] >= '0' && s1[l] <= '9') {
+								s2[m] = s1[l];
+								m++;
+								l++;
+							}
+							s2[m] = '\0';
+							targydb = atoi(s2);		//itt mar megvan a targy darabszama
+
+							//targy neve
+
+							m = 0; l = 0;
+							while (s1[l] != '\0') {
+								if (s1[l] >= 'a' && s1[l] <= 'z') {
+									s2[m] = s1[l];
+									m++;
+								}
+								l++;
+							}
+							s2[m] = '\0';
+							if (mut == NULL) mut = calloc(1, sizeof(targyak));		//ha nincs meg targy, letrehozun kegy ures dummy targyat
+							targyhozzaad(mut, s2, targydb);
+							if (DEBUG == 4) {
+								printf("DEBUG: mentes targy hozzaadasa: %s %d db\n", s2, targydb);
+								system("pause");
+							}
+
+							l = 0;
+						}
+						szam++;
+					}
+					else if (string[c] >= 'a' && string[c] <= 'z') {
+						betu++;
+					}
+					s1[l] = string[c];
+					l++;
+				}
+			}
+			else if (k == 3) {
+				
+
+			}
+
+			k++;
+			i++;
+		} while (st[i] != '\0');
+
 		//TODO
 		/*
 		- mentes fajl ellenorzo fv, a fajl ellenorzese
