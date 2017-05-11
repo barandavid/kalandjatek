@@ -1,4 +1,5 @@
-﻿#include <stdio.h>
+﻿#include "Kulso.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <Windows.h>
@@ -40,18 +41,8 @@ int targyell(targyak *elso, char  string[]);
 int targyhozzaad(targyak  *elso, char s[], int voltmar);
 void debug_targylista(targyak *elso);
 FILE* fajlmegnyit(char argv[], int* mentes);
-int ekezet(char c);
-int magyarbetu(char c);
 int mentesnevell(char s[]);
 void memfelszabadit(lista *pelso, targyak *telso);
-
-int getline(char s[], int n) {
-	int c, i;
-	for (i = 0; i<n && (c = getchar()) != EOF&&c != '\n'; i++) s[i] = c;
-	s[i] = '\0';
-	while (c != EOF&&c != '\n') c = getchar();
-	return i;
-}
 
 int main(int argc, char* argv[]) {
 	targyak *mut = NULL;		//targyak lista elso eleme
@@ -75,7 +66,7 @@ int main(int argc, char* argv[]) {
 
 									//kotelezo 1 parameter (CSV vagy SAVE fajl)
 	if (argc != 2) {
-		printf("Hianyzik a parancssori parameter!\n");
+		printf("Hianyzik a parancssori parameter! Adjon meg a program paraméterében egy érvényes .csv vagy .save fájlt!\n");
 		return 0;
 	}
 
@@ -841,25 +832,6 @@ void debug_targylista(targyak *elso) {
 	}
 }
 
-int ekezet(char c) {
-	//egy karakter ellenorzese, hogy ekezetes karakter-e
-	//kis es nagybetus ekezetek
-	char s[18] = { 'á', 'Á', 'é', 'É', 'í', 'Í', 'ó', 'Ó', 'ü', 'Ü', 'ű', 'Ű', 'ö', 'Ö', 'ő', 'Ő', 'ú', 'Ú' };
-	int i, van = 0;
-
-	for (i = 0; i < 18 && van == 0; i++) {
-		if (c == s[i]) van = 1;
-	}
-	if (van) return 1;
-	return 0;
-}
-int magyarbetu(char c) {
-	//egy karakter ellenorzese hogy a magyar ABC-ben benn van-e
-	//kis es nagybetuk egyarant, ekezetekkel
-	if ((c >= 'a'&&c <= 'z') || (c >= 'A' && c <= 'Z') || ekezet(c)) return 1;
-	return 0;
-}
-
 void memfelszabadit(lista *pelso, targyak *telso) {
 	lista *pakt, *ptemp;
 	targyak *takt, *ttemp;
@@ -879,4 +851,32 @@ void memfelszabadit(lista *pelso, targyak *telso) {
 		takt = takt->kov;
 		free(ttemp);
 	}
+}
+
+int getline(char s[], int n) {
+	int c, i;
+	for (i = 0; i<n && (c = getchar()) != EOF&&c != '\n'; i++) s[i] = c;
+	s[i] = '\0';
+	while (c != EOF&&c != '\n') c = getchar();
+	return i;
+}
+
+int ekezet(char c) {
+	//egy karakter ellenorzese, hogy ekezetes karakter-e
+	//kis es nagybetus ekezetek
+	char s[18] = { 'á', 'Á', 'é', 'É', 'í', 'Í', 'ó', 'Ó', 'ü', 'Ü', 'ű', 'Ű', 'ö', 'Ö', 'ő', 'Ő', 'ú', 'Ú' };
+	int i, van = 0;
+
+	for (i = 0; i < 18 && van == 0; i++) {
+		if (c == s[i]) van = 1;
+	}
+	if (van) return 1;
+	return 0;
+}
+
+int magyarbetu(char c) {
+	//egy karakter ellenorzese hogy a magyar ABC-ben benn van-e
+	//kis es nagybetuk egyarant, ekezetekkel
+	if ((c >= 'a'&&c <= 'z') || (c >= 'A' && c <= 'Z') || ekezet(c)) return 1;
+	return 0;
 }
