@@ -4,7 +4,7 @@
 #include <Windows.h>
 
 #define MAX 1000
-#define DEBUG 4				//0: kikapcsolva, 1: listak, 2: targyak, 3: fajlok
+#define DEBUG 2				//0: kikapcsolva, 1: listak, 2: targyak, 3: fajlok
 
 
 typedef struct list {			//lista, ahova beolvasom majd a dolgokat
@@ -185,45 +185,15 @@ int main(int argc, char* argv[]) {
 			else if (k == 1) {		//aktsorszam
 				aktsorszam = atoi(string);
 			}
-			else if (k == 2) {
-				//pl.: 3arany1kulcs
+			else if (k == 2) {		//targyak
+				if (mut == NULL) mut = calloc(1, sizeof(targyak));		//ha nincs meg targy, letrehozun kegy ures dummy targyat
+				//pl.: 3arany1kulcs\0k
 				l = m = 0;
-				for (c = 0; string[c] != '\0'; c++) {
-					if (string[c] >= '0' && string[c] <= '9') {
+				for (c = 0; string[c-1] != '\0'; c++) {
+					if ((string[c] >= '0' && string[c] <= '9') || string[c] == '\0') {
 						if (szam != 0 && betu != 0) {		//uj targy kezdodik
-							szam = betu = 0;
-
-							s1[l] = '\0';
-							m = 0;
-							l = 0;
-
-							while (s1[l] >= '0' && s1[l] <= '9') {
-								s2[m] = s1[l];
-								m++;
-								l++;
-							}
-							s2[m] = '\0';
-							targydb = atoi(s2);		//itt mar megvan a targy darabszama
-
-							//targy neve
-
-							m = 0; l = 0;
-							while (s1[l] != '\0') {
-								if (s1[l] >= 'a' && s1[l] <= 'z') {
-									s2[m] = s1[l];
-									m++;
-								}
-								l++;
-							}
-							s2[m] = '\0';
-							if (mut == NULL) mut = calloc(1, sizeof(targyak));		//ha nincs meg targy, letrehozun kegy ures dummy targyat
-							targyhozzaad(mut, s2, targydb);
-							if (DEBUG == 4) {
-								printf("DEBUG: mentes targy hozzaadasa: %s %d db\n", s2, targydb);
-								system("pause");
-							}
-
-							l = 0;
+							s1[l] = '+';
+							l++;							
 						}
 						szam++;
 					}
@@ -233,15 +203,38 @@ int main(int argc, char* argv[]) {
 					s1[l] = string[c];
 					l++;
 				}
+				s1[l] = '\0';
+				targyhozzaad(mut, s1, 0);
+				if (DEBUG == 4) {
+					printf("DEBUG: mentes targy hozzaadasa: %s", s1);
+					system("pause");
+				}
 			}
 			else if (k == 3) {
-				
+				l = m = 0;
+				while (string[l-1] != '\0') {
+					if (string[l] >= '0' && string[l] <= '9')
+					{
+						s2[m] = string[l];
+						m++;
+					}
+					else {
+						s2[m] = '\0';
+						akt = elso;
+						while (akt != NULL && akt->sorszam != atoi(s2)) akt = akt->kov;
+						if (akt != NULL) {
+							akt->volt = 1;
+						}
+						m = 0;
+					}
+					l++;
+				}
 
 			}
 
 			k++;
 			i++;
-		} while (st[i] != '\0');
+		} while (st[i] != '\0' && st[i-1] != '\0');
 
 		//TODO
 		/*
@@ -252,6 +245,7 @@ int main(int argc, char* argv[]) {
 		- mentes fajlban talalhato volt ertekek visszaallitasa
 		*/
 
+		jatek(elso, mut, aktsorszam);
 		printf("mentes placeholder\n");
 		return 0;
 	}
@@ -638,6 +632,8 @@ int jatek(lista *elso, targyak *mut, int aktsorsz) {				//játék függvény (pa
 
 	if(mut==NULL) mut = calloc(1, sizeof(targyak));		//ha nincs meg targy, letrehozun kegy ures dummy targyat
 	mut->kov = NULL;
+
+	aktsorszam = aktsorsz;	//mentesbol aktsorszam visszaallitasa
 	do {
 		system("cls");				//felület letörlése
 		akt = elso;
