@@ -133,7 +133,12 @@ int main(int argc, char* argv[]) {
 			if (!jatek(elso,mut,elso->sorszam)) return 0;
 	}
 	else {		//mentes betoltese
-
+		
+		fgets(st, MAX,fp);
+		if (mentesell(st) == 0) {
+			printf("Hibas fajl\n");
+			return 0;
+		}
 		//TODO
 		/*
 		- mentes fajl ellenorzo fv, a fajl ellenorzese
@@ -171,33 +176,33 @@ int mentesell(char sor[]) {
 				//azt is le kell, hogy '.'-al végződik-e?
 			}
 		}
-		if (k == 1) { 
-			//asnio
+		else if (k == 1) { 
 			for (c = 0; string[c] != '\0'; c++) {
 				if (string[c] <'0' || string[c]>'9')return 0;
 			}
 		}
-		if (k == 2) {
+		else if (k == 2) {
 			//pl.: 3arany1kulcs
 			for (c = 0; string[c] != '\0'; c++) {
 				if (string[c] >= '0' && string[c] <= '9') {
+					if (szam != 0 && betu != 0) {
+						szam = betu = 0;
+					}
 					szam++;
 					if (betu != 0) return 0;
 				}
 				else if (string[c] >= 'a' && string[c] <= 'z') {
 					betu++;
 					if (szam == 0) return 0;
-					szam = betu = 0;
 				}
 			}
 		}
-		
-		if (k = 3) {
+		else if (k == 3) {
 			x = strlen(string);
 			for (c = 0; string[c] != '\0'; c++) {
 				if ((string[c] <'0' || string[c]>'9') && string[c] != ',')return 0;
 				if (string[0] == ',')return 0;
-				if (string[x - 1] < 0 || string[x - 1] > 9) return 0;
+				if (string[x - 1] < '0' || string[x - 1] > '9') return 0;
 			}
 		}
 				
