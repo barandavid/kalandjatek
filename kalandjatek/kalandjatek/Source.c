@@ -4,7 +4,7 @@
 #include <Windows.h>
 
 #define MAX 1000
-#define DEBUG 2				//0: kikapcsolva, 1: listak, 2: targyak, 3: fajlok
+#define DEBUG 0				//0: kikapcsolva, 1: listak, 2: targyak, 3: fajlok, 4: mentes es egyebek
 
 
 typedef struct list {			//lista, ahova beolvasom majd a dolgokat
@@ -34,7 +34,7 @@ void szetszed(char s[], struct list *akt);
 int ellenoriz(char s[]);
 void kiir(lista * elso, int szam);
 int opvalasztas();
-int jatek(lista *elso, targyak *telso, int aktsorsz);
+int jatek(lista *elso, targyak *mut, int aktsorsz, char fajlnev[]);
 int sorszamell(struct lista *elso);
 int targyell(targyak *elso, char  string[]);
 int targyhozzaad(targyak  *elso, char s[], int voltmar);
@@ -42,6 +42,8 @@ void debug_targylista(targyak *elso);
 FILE* fajlmegnyit(char argv[], int* mentes);
 int ekezet(char c);
 int magyarbetu(char c);
+int mentesnevell(char s[]);
+void memfelszabadit(lista *pelso, targyak *telso);
 
 int getline(char s[], int n) {
 	int c, i;
@@ -65,6 +67,7 @@ int main(int argc, char* argv[]) {
 	int c, k, j, l, m;
 	int aktsorszam;
 	int targydb;
+	char fajlnev[MAX];
 
 
 	system("chcp 1250");			//ékezetes betűket is ki tudjunk írni
@@ -76,7 +79,6 @@ int main(int argc, char* argv[]) {
 		return 0;
 	}
 
-	//fp = fopen("jatek.csv", "r");			//olvasásra nyitjuk meg a CSV-t
 	fp = fajlmegnyit(argv[1], &mentes);
 	if (fp == NULL) {
 		printf("Hiba a fajl megnyitasakor! \n");
@@ -112,8 +114,7 @@ int main(int argc, char* argv[]) {
 			szetszed(st, akt);
 			temp = akt;
 		}
-
-		//ide kell majd a sorszamell
+		fclose(fp);
 		if (!sorszamell(elso)) {
 			printf("Hibas sorszam!\n");
 			return 0;
@@ -137,8 +138,10 @@ int main(int argc, char* argv[]) {
 				akt = akt->kov;
 			}
 		}
-		//kiir(elso, 4);
-			if (!jatek(elso,mut,elso->sorszam)) return 0;
+		if (!jatek(elso, mut, elso->sorszam, argv[1])) {
+			memfelszabadit(elso, mut);
+			return 0;
+		}
 	}
 	else {		//mentes betoltese
 		
@@ -166,6 +169,7 @@ int main(int argc, char* argv[]) {
 
 			if (k == 0) {		//CSV neve
 				fp2 = fopen(string, "r");
+				strcpy(fajlnev, string);
 				while (!feof(fp2)) {
 					fgets(s1, MAX, fp2);			//beolvasom soronként 
 
@@ -229,33 +233,28 @@ int main(int argc, char* argv[]) {
 					}
 					l++;
 				}
-
 			}
 
 			k++;
 			i++;
 		} while (st[i] != '\0' && st[i-1] != '\0');
 
-		//TODO
-		/*
-		- mentes fajl ellenorzo fv, a fajl ellenorzese
-		- mentes fajlban talalhato csv betoltese (ellenoriz fv, fenti listakeszito ciklus, sorszamell fv)
-		- mentes fajlban talalhato aktsorszam valtozo visszaallitasa
-		- mentes fajlban talalhato targyak visszaallitasa
-		- mentes fajlban talalhato volt ertekek visszaallitasa
-		*/
-		printf("DEBUG: mentes targylista: \n");
-		debug_targylista(mut);
-		system("pause");
-		jatek(elso, mut, aktsorszam);
-		printf("mentes placeholder\n");
-		return 0;
+		if (DEBUG == 4){
+			printf("DEBUG: mentes targylista: \n");
+			debug_targylista(mut);
+			system("pause");
+		}
+
+		if (!jatek(elso, mut, aktsorszam, fajlnev)) {
+			memfelszabadit(elso, mut);
+			fclose(fp);
+			return 0;
+		}
 	}
 }
 
 int mentesell(char sor[]) {
 	//ellenoriz fv mintajara
-	//mappaban a minta, hogy hogyan vannak felosztva az egyes reszek
 
 	int i=0,j=0,k=0,c;
 	char string[MAX];
@@ -273,7 +272,6 @@ int mentesell(char sor[]) {
 			for (c = 0; string[c] != '\0'; c++) {
 				if ((string[c] < 'a' || string[c] > 'z') && string[c] != '.')return 0;
 				if (string[0] == '.')return 0;
-				//azt is le kell, hogy '.'-al végződik-e?
 			}
 		}
 		else if (k == 1) { 
@@ -353,8 +351,8 @@ void szetszed(char s[], struct list *akt) {		//szétszedi a stringbe fájlból b
 			string[j] = s[i];
 			j++;
 		}
-		string[j] = '\0';/*									//lezárja a stringet ha eléri a ;-t vagy sorvéget
-						 printf("%s\n", string);*/
+		string[j] = '\0';									//lezárja a stringet ha eléri a ;-t vagy sorvéget
+
 
 		switch (k) {							//van egy változó és egyes esetekben ,,case,,-ekben mit kell csinálni
 		case 0:
@@ -385,7 +383,6 @@ void szetszed(char s[], struct list *akt) {		//szétszedi a stringbe fájlból b
 		k++;
 		i++;			//átléptetjük a ;-n, azért kell ide az i++
 	} while (s[i] != '\0' && s[i] != '\n');
-	/*printf("----------------------------uj sor---------------------\n");*/
 }
 
 int ellenoriz(char s[]) { //leellenőrzi, hogy az adott helyen megfelelő karakter/szám van-e
@@ -395,8 +392,6 @@ int ellenoriz(char s[]) { //leellenőrzi, hogy az adott helyen megfelelő karakt
 	int szam = 0;
 	int betu = 0;
 	int plusz_minusz = 0;
-
-	/*printf("%s\n", s);*/
 
 	do {
 		j = 0;
@@ -478,15 +473,12 @@ void kiir(lista *elso, int szam) {				//függvény, amely kiírja a megadott lis
 	while ((akt != NULL) && (akt->sorszam != szam)) {
 		akt = akt->kov;
 	}
-	/*if (akt->hova_op1 == 0) {
-		printf("Vége a játéknak!");  //Ezt megváltoztattam úgy hogy a csv-ból írja ki. Bug: Minkettő módon várja az opciókat! 
-	}
-	else {*/
+
 		system("cls");
 		printf("\t\t\t%s\n\n", akt->helyszin);								//helyszín kiírása
 		printf("%s\n\n", akt->leiras);										//leírás kiírása
-		if (akt->hova_op1 != 0) printf("1. %s\n2. %s\n", akt->op1_leiras, akt->op2_leiras);			//választási lehetőségek kiírása
-	//}
+		if (akt->hova_op1 != 0) printf("1. %s\n2. %s\n\nVálassz: ", akt->op1_leiras, akt->op2_leiras);			//választási lehetőségek kiírása
+
 }
 
 int opvalasztas() {						//opció választás, ahol az '1'  és a '2'  az elfogadott
@@ -494,9 +486,22 @@ int opvalasztas() {						//opció választás, ahol az '1'  és a '2'  az elfoga
 	do {
 		c = _getche();	//bekérjük a konzolablakból a számok, amelyiket választjuk
 		putchar('\n');
-		if (c == '1') return 1;
-		else if (c == '2') return 2;
-		else if (c == 'x') return 0;			//x-re kilép a program
+		if (c == '1') {
+			printf("\n");
+			return 1;
+		}
+		else if (c == '2') {
+			printf("\n");
+			return 2;
+		}
+		else if (c == 'x') {
+			printf("\n");
+			return 0;			//x-re kilép a program
+		}
+		else if (c == 's') {
+			printf("\n");
+			return -1;			//s-re aktualis allas mentese
+		}
 	} while (1);
 }
 
@@ -557,7 +562,6 @@ int targyhozzaad(targyak  *elso, char s[], int voltmar) {
 
 		szam[j] = '\0';
 
-		//i = 0;
 		j = 0;
 		for (; s[i] != '\0' && s[i] != '+' &&s[i] != '-'; i++) {						//targy stringbe teszi a targyat
 			targy[j] = s[i];
@@ -627,13 +631,19 @@ int targyhozzaad(targyak  *elso, char s[], int voltmar) {
 	
 }
 
-int jatek(lista *elso, targyak *mut, int aktsorsz) {				//játék függvény (palya elso eleme, targyak elso eleme, aktsorszam)
-	lista *akt;
+int jatek(lista *elso, targyak *mut, int aktsorsz, char fajlnev[]) {				//játék függvény (palya elso eleme, targyak elso eleme, aktsorszam)
+	lista *akt, *makt;
 	int aktsorszam = 1;
 	int op;
+	FILE *mentesfp;
+	char mentes[MAX];
+	char mentesvolt[MAX];
+	int i, j;
+	int jo, h;
+	targyak *takt;
 
 	if (mut == NULL) {
-		mut = calloc(1, sizeof(targyak));		//ha nincs meg targy, letrehozun kegy ures dummy targyat
+		mut = calloc(1, sizeof(targyak));		//ha nincs meg targy, letrehozunk egy ures dummy targyat
 		mut->kov = NULL;
 	}
 
@@ -641,12 +651,13 @@ int jatek(lista *elso, targyak *mut, int aktsorsz) {				//játék függvény (pa
 	do {
 		system("cls");				//felület letörlése
 		akt = elso;
-		while (akt->sorszam != aktsorszam) akt = akt->kov; //ide lehet kell meg a NULL ellenorzes
+		while (akt->sorszam != aktsorszam) akt = akt->kov; 
 
 
 
 		kiir(elso, aktsorszam);
 		op = opvalasztas();		//1   vagy  2 a visszateres
+
 		if (op == 1) {
 			if (akt->szuks_targy[0] == '\0')		// ha nincs a tovabblepesnek feltetele
 			{
@@ -732,8 +743,7 @@ int jatek(lista *elso, targyak *mut, int aktsorsz) {				//játék függvény (pa
 						system("pause");
 					}
 
-
-					printf("Ehhez az opcióhoz %c %s szükséges! A másik lehetőséget választod.\n", akt->szuks_targy[0] , akt->szuks_targy+1); //ha kell valamilyen tárgy akkor figyelmeztet rá	//EZ ITT NEM LESZ JO PETI (10 vagy tobb targy utan)
+					printf("Ehhez az opcióhoz %s szükséges! A másik lehetőséget választod.\n", akt->szuks_targy); //ha kell valamilyen tárgy akkor figyelmeztet rá
 					printf("%s\n", akt->mi_tort_op2);
 					_getche();
 					aktsorszam = akt->hova_op2;
@@ -749,15 +759,75 @@ int jatek(lista *elso, targyak *mut, int aktsorsz) {				//játék függvény (pa
 			_getche();
 			aktsorszam = akt->hova_op2;  //ha 2-esz választjuk ida ugrik ahova a kettes opció után kell
 		}
+		else if (op == -1) {			//mentes
+		//fajlnev;aktsorszam;targyak;hol_voltunk
+			int jo = 0;
+			do {
+				system("cls");
+				printf("\t\t\tJáték mentése\n\n");
+				printf("Adja meg a mentés nevét: ");
+				h = getline(mentes, MAX - 1);
+				if (h == 0) {
+					printf("\nHiba: üres sort adott meg.\n");
+					_getche();
+				}
+				else if (!mentesnevell(mentes)) {
+					printf("\nHiba: a mentés neve csak betűkből és számokból állhat.\n");
+					_getche();
+				}
+				else if (h == 1 && mentes[0] == 'x') jo = 1;
+				else jo = 1;
+			} while (jo == 0);
+
+			if (!(h == 1 && mentes[0] == 'x')) {
+				sprintf(mentes, "%s.save", mentes);
+				mentesfp = fopen(mentes, "w");
+				if (mentesfp == NULL) {
+					printf("Hiba: nem sikerült a fájlt megnyitni.");
+					_getche();
+				}
+				else {
+					fprintf(mentesfp, "%s;", fajlnev);
+					fprintf(mentesfp, "%d;", aktsorszam);
+
+					takt = mut;
+					while (takt != NULL) {
+						if (takt->drb != 0) {		//dummy elem atlepese
+							fprintf(mentesfp, "%d%s", takt->drb, takt->nev);
+						}
+						takt = takt->kov;
+					}
+					fprintf(mentesfp, ";");
+					makt = elso;
+					i = j = 0;
+					while (makt != NULL) {
+						if (makt->volt) {
+							mentesvolt[i] = makt->sorszam + 48;
+							i++;
+							mentesvolt[i] = ',';
+							i++;
+						}
+						makt = makt->kov;
+					}
+					mentesvolt[i] = '\0';
+					if (mentesvolt[strlen(mentesvolt) - 1] == ',') mentesvolt[strlen(mentesvolt) - 1] = '\0';
+					fprintf(mentesfp, "%s", mentesvolt);
+					fclose(mentesfp);
+					printf("\n\nJáték elmentve: %s\n", mentes);
+					_getche();
+				}
+			}
+		}
 		else return -1; //KILEPES
-
-
-
-
-
 	} while (aktsorszam != 0);				//azért 0, mert akkor lép ki a játékból
+}
 
-
+int mentesnevell(char s[]) {
+	int i;
+	for (i = 0; s[i] != '\0'; i++) {
+		if ((s[i]<'a' || s[i]>'z') && (s[i]<'0' || s[i]>'9')) return 0;
+	}
+	return 1;
 }
 
 void debug_targylista(targyak *elso) {
@@ -790,16 +860,23 @@ int magyarbetu(char c) {
 	return 0;
 }
 
+void memfelszabadit(lista *pelso, targyak *telso) {
+	lista *pakt, *ptemp;
+	targyak *takt, *ttemp;
 
-/*
-kell még:
-Dávid:
+	pakt = pelso;
 
-mentés ellenőrzés
+	while (pakt != NULL) {
+		ptemp = pakt;
+		pakt = pakt->kov;
+		free(ptemp);
+	}
 
-Martin:
+	takt = telso;
 
-- mentés
--betöltés
-
-*/
+	while (takt != NULL) {
+		ttemp = takt;
+		takt = takt->kov;
+		free(ttemp);
+	}
+}
